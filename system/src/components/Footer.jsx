@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import logo from '../assets/HIsab_logo.png'
 
 function Footer() {
   return (
@@ -8,10 +9,8 @@ function Footer() {
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-success rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">HP</span>
-              </div>
+            <div className="flex items-center gap-3 mb-4">
+              <img src={logo} alt="Hisab Pakka Logo" className="h-10 w-auto brightness-0 invert" />
               <span className="text-xl font-bold">Hisab Pakka</span>
             </div>
             <p className="text-gray-400 leading-relaxed">

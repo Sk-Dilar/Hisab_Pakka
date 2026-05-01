@@ -8,6 +8,7 @@ dotenv.config();
 
 const authRoutes = require("./routes/authRoutes");
 const clientRoutes = require("./routes/clientRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

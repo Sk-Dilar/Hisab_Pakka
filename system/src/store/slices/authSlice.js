@@ -1,52 +1,24 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
-// Helper function for API requests
-const apiRequest = async (endpoint, method = "GET", data = null) => {
-  const token = localStorage.getItem("token");
-
-  const config = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  if (data) {
-    config.body = JSON.stringify(data);
-  }
-
-  const response = await fetch(`${API_URL}${endpoint}`, config);
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(result.message || "Something went wrong");
-  }
-
-  return result;
-};
+import axiosInstance from "../../api/axiosInstance";
 
 // Async thunk for login
 export const loginAsync = createAsyncThunk(
   "auth/login",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const response = await apiRequest("/auth/login", "POST", {
+      const response = await axiosInstance.post("/auth/login", {
         email,
         password,
       });
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
-      return response;
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Login failed"
+      );
     }
-  },
+  }
 );
 
 // Async thunk for register
@@ -54,18 +26,20 @@ export const registerAsync = createAsyncThunk(
   "auth/register",
   async ({ name, email, password }, { rejectWithValue }) => {
     try {
-      const response = await apiRequest("/auth/register", "POST", {
+      const response = await axiosInstance.post("/auth/register", {
         name,
         email,
         password,
       });
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
-      return response;
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Registration failed"
+      );
     }
-  },
+  }
 );
 
 // Load user from localStorage on app start
@@ -91,14 +65,16 @@ export const forgotPasswordAsync = createAsyncThunk(
   "auth/forgotPassword",
   async ({ email }, { rejectWithValue }) => {
     try {
-      const response = await apiRequest("/auth/forgot-password", "POST", {
+      const response = await axiosInstance.post("/auth/forgot-password", {
         email,
       });
-      return response;
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Request failed"
+      );
     }
-  },
+  }
 );
 
 // Async thunk for reset password
@@ -106,15 +82,17 @@ export const resetPasswordAsync = createAsyncThunk(
   "auth/resetPassword",
   async ({ token, newPassword }, { rejectWithValue }) => {
     try {
-      const response = await apiRequest("/auth/reset-password", "POST", {
+      const response = await axiosInstance.post("/auth/reset-password", {
         token,
         newPassword,
       });
-      return response;
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Reset failed"
+      );
     }
-  },
+  }
 );
 
 const initialState = {

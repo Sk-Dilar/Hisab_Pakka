@@ -8,6 +8,8 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./components/AppLayout";
+import Clients from "./pages/Clients";
 
 function App() {
   const dispatch = useDispatch();
@@ -23,14 +25,21 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        
         <Route
-          path="/app/*"
+          path="/app"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <AppLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="clients" element={<Clients />} />
+          {/* Future routes will be added here */}
+          <Route path="*" element={<Dashboard />} />
+        </Route>
       </Routes>
     </Router>
   );

@@ -8,6 +8,7 @@ import {
   clearError,
   clearSuccessMessage,
 } from "../store/slices/authSlice";
+import logo from "../assets/HIsab_logo.png";
 
 function ForgotPassword() {
   const dispatch = useDispatch();
@@ -110,9 +111,7 @@ function ForgotPassword() {
         </div>
         <div className="relative z-10 flex flex-col justify-center px-16 text-white">
           <Link to="/" className="flex items-center gap-3 mb-12">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">HP</span>
-            </div>
+            <img src={logo} alt="Hisab Pakka Logo" className="h-12 w-auto brightness-0 invert" />
             <span className="text-2xl font-bold">Hisab Pakka</span>
           </Link>
           <h1 className="text-5xl font-bold mb-6">
@@ -153,10 +152,8 @@ function ForgotPassword() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-success rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">HP</span>
-              </div>
+            <Link to="/" className="flex items-center gap-3">
+              <img src={logo} alt="Hisab Pakka Logo" className="h-10 w-auto" />
               <span className="text-xl font-bold text-gray-900">
                 Hisab Pakka
               </span>

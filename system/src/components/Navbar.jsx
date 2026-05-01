@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import logo from '../assets/HIsab_logo.png'
 
 function Navbar({ scrolled }) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
@@ -8,10 +9,8 @@ function Navbar({ scrolled }) {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-success rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">HP</span>
-            </div>
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logo} alt="Hisab Pakka Logo" className="h-10 w-auto" />
             <span className={`text-xl font-bold ${scrolled ? 'text-gray-900' : 'text-gray-900'}`}>Hisab Pakka</span>
           </Link>
 

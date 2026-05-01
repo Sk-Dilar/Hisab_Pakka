@@ -25,7 +25,9 @@ The purpose of this document is to outline the functional and non-functional req
 
 ### **1.3 Tech Stack**
 
-- **Frontend:** React+Tailwind+Material_ui (Dual-app architecture).
+- **Frontend:** React + Tailwind + Material UI (Dual-app architecture).
+- **State Management:** Redux Toolkit (RTK) for centralized global state.
+- **Data Fetching:** RTK Query with Axios for optimized API orchestration and caching.
 - **Backend:** Node.js with Express framework.
 - **Database:** MongoDB (NoSQL) for flexible document storage.
 - **Authentication:** JSON Web Tokens (JWT) for secure, stateless sessions.
@@ -46,6 +48,13 @@ root/
 - **System App:** Handles the landing page, user registration/login, and the primary dashboard where clients, projects, and invoices are managed.
 - **Super Admin App:** A restricted interface for platform owners to monitor usage, manage user accounts, and update subscription plans.
 - **Backend:** The central engine managing the MongoDB connection, executing transactional logic, and serving APIs to both frontend applications.
+
+### **2.3 Frontend Architecture**
+
+- **State Management:** Uses Redux Toolkit to manage global UI state (e.g., authentication, sidebar toggles).
+- **API Orchestration:** Employs RTK Query for all server-side data interactions. 
+- **Custom Base Query:** A custom Axios-based base query is used within RTK Query to handle authentication headers, base URLs, and consistent error handling.
+- **Caching & Synchronization:** Leverages RTK Query's built-in caching mechanism to reduce redundant network requests and ensure UI synchronization across components.
 
 ---
 
