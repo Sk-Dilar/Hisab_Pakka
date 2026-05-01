@@ -10,6 +10,9 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AppLayout from "./components/AppLayout";
 import Clients from "./pages/Clients";
+import Projects from "./pages/Projects";
+import ProjectDetails from "./pages/ProjectDetails";
+import Settings from "./pages/Settings";
 
 function App() {
   const dispatch = useDispatch();
@@ -37,6 +40,9 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="clients" element={<Clients />} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="projects/:id" element={<ProjectDetails />} />
+          <Route path="settings" element={<Settings />} />
           {/* Future routes will be added here */}
           <Route path="*" element={<Dashboard />} />
         </Route>

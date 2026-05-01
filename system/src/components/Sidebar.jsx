@@ -7,7 +7,8 @@ import {
   FiFileText, 
   FiDollarSign, 
   FiLogOut,
-  FiX
+  FiX,
+  FiSettings
 } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
@@ -20,9 +21,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { name: 'Dashboard', icon: <FiHome />, path: '/app/dashboard' },
     { name: 'Clients', icon: <FiUsers />, path: '/app/clients' },
     { name: 'Projects', icon: <FiBriefcase />, path: '/app/projects' },
-    { name: 'Work Items', icon: <FiFileText />, path: '/app/work-items' },
     { name: 'Invoices', icon: <FiFileText />, path: '/app/invoices' },
     { name: 'Payments', icon: <FiDollarSign />, path: '/app/payments' },
+    { name: 'Settings', icon: <FiSettings />, path: '/app/settings' },
   ];
 
   return (

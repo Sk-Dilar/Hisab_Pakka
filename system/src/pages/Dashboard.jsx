@@ -11,15 +11,18 @@ import {
   ListItemText,
   Divider,
   Chip,
-  Skeleton
+  Skeleton,
+  Breadcrumbs
 } from '@mui/material';
 import { 
   FiUsers, 
   FiBriefcase, 
   FiDollarSign, 
-  FiActivity 
+  FiActivity,
+  FiHome 
 } from 'react-icons/fi';
 import { useGetDashboardStatsQuery } from '../store/api/apiSlice';
+import { Link } from 'react-router-dom';
 
 const StatCard = ({ title, value, icon, color, loading }) => (
   <Card sx={{ height: '100%' }}>
@@ -61,6 +64,11 @@ const Dashboard = () => {
 
   return (
     <Box>
+      <Breadcrumbs sx={{ mb: 2 }}>
+        <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+          <FiHome style={{ marginRight: 8 }} /> Dashboard
+        </Typography>
+      </Breadcrumbs>
       <Typography variant="h4" fontWeight="bold" color="text.primary" mb={4}>
         Dashboard
       </Typography>

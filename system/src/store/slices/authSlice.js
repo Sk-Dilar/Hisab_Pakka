@@ -95,6 +95,21 @@ export const resetPasswordAsync = createAsyncThunk(
   }
 );
 
+export const updateProfileAsync = createAsyncThunk(
+  "auth/updateProfile",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/auth/update-profile", data);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Update failed"
+      );
+    }
+  }
+);
+
 const initialState = {
   user: null,
   token: null,
@@ -192,6 +207,20 @@ const authSlice = createSlice({
         state.successMessage = action.payload.message;
       })
       .addCase(resetPasswordAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Update profile cases
+      .addCase(updateProfileAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfileAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.successMessage = action.payload.message;
+      })
+      .addCase(updateProfileAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

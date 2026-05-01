@@ -15,9 +15,11 @@ import {
   TablePagination,
   IconButton,
   Chip,
-  Skeleton
+  Skeleton,
+  Breadcrumbs
 } from '@mui/material';
-import { FiSearch, FiPlus, FiMoreVertical, FiEye } from 'react-icons/fi';
+import { FiSearch, FiPlus, FiMoreVertical, FiEye, FiHome, FiUsers } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import { useGetClientsQuery } from '../store/api/apiSlice';
 import CreateClientModal from '../components/CreateClientModal';
 
@@ -62,6 +64,14 @@ const Clients = () => {
 
   return (
     <Box>
+      <Breadcrumbs sx={{ mb: 2 }}>
+        <Link to="/app/dashboard" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}>
+          <FiHome style={{ marginRight: 8 }} /> Dashboard
+        </Link>
+        <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+          <FiUsers style={{ marginRight: 8 }} /> Clients
+        </Typography>
+      </Breadcrumbs>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h4" fontWeight="bold" color="text.primary">
           Clients

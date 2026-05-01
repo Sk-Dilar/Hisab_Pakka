@@ -58,6 +58,68 @@ export const apiSlice = createApi({
       }),
       providesTags: ['Client', 'Project', 'WorkItem'],
     }),
+    getProjects: builder.query({
+      query: (params) => ({
+        url: '/projects',
+        method: 'GET',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.projects.map(({ _id }) => ({ type: 'Project', id: _id })),
+              { type: 'Project', id: 'LIST' },
+            ]
+          : [{ type: 'Project', id: 'LIST' }],
+    }),
+    getProject: builder.query({
+      query: (id) => `/projects/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Project', id }],
+    }),
+    createProject: builder.mutation({
+      query: (data) => ({
+        url: '/projects',
+        method: 'POST',
+        data,
+      }),
+      invalidatesTags: [{ type: 'Project', id: 'LIST' }],
+    }),
+    getWorkItems: builder.query({
+      query: (params) => ({
+        url: '/work-items',
+        method: 'GET',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.workItems.map(({ _id }) => ({ type: 'WorkItem', id: _id })),
+              { type: 'WorkItem', id: 'LIST' },
+            ]
+          : [{ type: 'WorkItem', id: 'LIST' }],
+    }),
+    addWorkItem: builder.mutation({
+      query: (data) => ({
+        url: '/work-items',
+        method: 'POST',
+        data,
+      }),
+      invalidatesTags: [
+        { type: 'WorkItem', id: 'LIST' },
+        { type: 'Client', id: 'LIST' }, // Balance changes
+        'Project'
+      ],
+    }),
+    deleteWorkItem: builder.mutation({
+      query: (id) => ({
+        url: `/work-items/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [
+        { type: 'WorkItem', id: 'LIST' },
+        { type: 'Client', id: 'LIST' }, // Balance changes
+      ],
+    }),
   }),
 });
 
@@ -65,4 +127,10 @@ export const {
   useGetClientsQuery,
   useCreateClientMutation,
   useGetDashboardStatsQuery,
+  useGetProjectsQuery,
+  useGetProjectQuery,
+  useCreateProjectMutation,
+  useGetWorkItemsQuery,
+  useAddWorkItemMutation,
+  useDeleteWorkItemMutation,
 } = apiSlice;
