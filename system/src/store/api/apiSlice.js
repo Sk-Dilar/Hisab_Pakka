@@ -127,6 +127,13 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: [{ type: 'Client', id: 'LIST' }],
     }),
+    restoreClient: builder.mutation({
+      query: (id) => ({
+        url: `/clients/${id}/restore`,
+        method: 'PUT',
+      }),
+      invalidatesTags: [{ type: 'Client', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -141,4 +148,5 @@ export const {
   useAddWorkItemMutation,
   useDeleteWorkItemMutation,
   useDeleteClientMutation,
+  useRestoreClientMutation,
 } = apiSlice;

@@ -21,7 +21,8 @@ const clientSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    trim: true
+    trim: true,
+    match: [/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian phone number']
   },
   companyName: {
     type: String,

@@ -4,10 +4,15 @@ const Client = require('../models/Client');
 exports.getClients = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { page = 1, limit = 10, search = '' } = req.query;
+    const { page = 1, limit = 10, search = '', status = 'active' } = req.query;
 
     // Build query
     const query = { userId };
+    
+    // Status filter
+    if (status !== 'all') {
+      query.status = status;
+    }
     
     // Search by name if provided
     if (search) {
@@ -170,5 +175,30 @@ exports.deleteClient = async (req, res) => {
   } catch (error) {
     console.error('Delete Client Error:', error);
     res.status(500).json({ message: 'Failed to delete client', error: error.message });
+  }
+};
+
+// Restore client
+exports.restoreClient = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const client = await Client.findOneAndUpdate(
+      { _id: id, userId },
+      { status: 'active' },
+      { new: true }
+    );
+    
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+
+    res.status(200).json({
+      message: 'Client restored successfully'
+    });
+  } catch (error) {
+    console.error('Restore Client Error:', error);
+    res.status(500).json({ message: 'Failed to restore client', error: error.message });
   }
 };

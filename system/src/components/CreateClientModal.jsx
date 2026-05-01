@@ -29,10 +29,17 @@ const CreateClientModal = ({ open, onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'phone' && value && !/^\d+$/.test(value)) return;
+    if (name === 'phone' && value !== '' && !/^\d+$/.test(value)) return;
     if (name === 'phone' && value.length > 10) return;
     setFormData({ ...formData, [name]: value });
     setErrorMsg('');
+  };
+
+  const isFormValid = () => {
+    if (!formData.name.trim()) return false;
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) return false;
+    if (formData.phone && !/^[6-9]\d{9}$/.test(formData.phone)) return false;
+    return true;
   };
 
   const handleSubmit = async (e) => {
@@ -87,7 +94,8 @@ const CreateClientModal = ({ open, onClose }) => {
             <Grid item xs={12}>
               <TextField
                 name="name"
-                label="Client Name *"
+                label="Client Name"
+                required
                 fullWidth
                 variant="outlined"
                 value={formData.name}
@@ -105,6 +113,8 @@ const CreateClientModal = ({ open, onClose }) => {
                 onChange={handleChange}
                 size="small"
                 type="email"
+                error={Boolean(formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))}
+                helperText={formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? "Enter a valid email address" : ""}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -116,6 +126,8 @@ const CreateClientModal = ({ open, onClose }) => {
                 value={formData.phone}
                 onChange={handleChange}
                 size="small"
+                error={Boolean(formData.phone && !/^[6-9]\d{9}$/.test(formData.phone))}
+                helperText={formData.phone && !/^[6-9]\d{9}$/.test(formData.phone) ? "Enter a valid 10-digit Indian phone number" : ""}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -137,7 +149,7 @@ const CreateClientModal = ({ open, onClose }) => {
             type="submit" 
             variant="contained" 
             color="primary" 
-            disabled={isLoading}
+            disabled={isLoading || !isFormValid()}
             startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : null}
           >
             Create Client
