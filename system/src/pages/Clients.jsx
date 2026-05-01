@@ -18,21 +18,24 @@ import {
   Skeleton,
   Breadcrumbs
 } from '@mui/material';
-import { FiSearch, FiPlus, FiMoreVertical, FiEye, FiHome, FiUsers } from 'react-icons/fi';
+import { FiSearch, FiPlus, FiTrash2, FiEye, FiHome, FiUsers } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { useGetClientsQuery } from '../store/api/apiSlice';
+import { useGetClientsQuery, useDeleteClientMutation } from '../store/api/apiSlice';
 import CreateClientModal from '../components/CreateClientModal';
+import { useDebounce } from '../hooks/useDebounce';
 
 const Clients = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteClient] = useDeleteClientMutation();
 
   const { data, isLoading, isFetching } = useGetClientsQuery({
     page: page + 1,
     limit: rowsPerPage,
-    search: searchTerm
+    search: debouncedSearch
   });
 
   const handleSearchChange = (e) => {
@@ -60,6 +63,16 @@ const Clients = () => {
       style: 'currency',
       currency: 'INR',
     }).format(amount);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this client?')) {
+      try {
+        await deleteClient(id).unwrap();
+      } catch (err) {
+        alert(err.data?.message || 'Failed to delete client');
+      }
+    }
   };
 
   return (
@@ -149,8 +162,12 @@ const Clients = () => {
                       <IconButton size="small" color="primary">
                         <FiEye />
                       </IconButton>
-                      <IconButton size="small">
-                        <FiMoreVertical />
+                      <IconButton 
+                        size="small" 
+                        color="error"
+                        onClick={() => handleDelete(client._id)}
+                      >
+                        <FiTrash2 />
                       </IconButton>
                     </TableCell>
                   </TableRow>

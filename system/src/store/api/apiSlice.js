@@ -120,6 +120,13 @@ export const apiSlice = createApi({
         { type: 'Client', id: 'LIST' }, // Balance changes
       ],
     }),
+    deleteClient: builder.mutation({
+      query: (id) => ({
+        url: `/clients/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Client', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -133,4 +140,5 @@ export const {
   useGetWorkItemsQuery,
   useAddWorkItemMutation,
   useDeleteWorkItemMutation,
+  useDeleteClientMutation,
 } = apiSlice;

@@ -154,14 +154,18 @@ exports.deleteClient = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const client = await Client.findOneAndDelete({ _id: id, userId });
+    const client = await Client.findOneAndUpdate(
+      { _id: id, userId },
+      { status: 'inactive' },
+      { new: true }
+    );
     
     if (!client) {
       return res.status(404).json({ message: 'Client not found' });
     }
 
     res.status(200).json({
-      message: 'Client deleted successfully'
+      message: 'Client deactivated successfully'
     });
   } catch (error) {
     console.error('Delete Client Error:', error);

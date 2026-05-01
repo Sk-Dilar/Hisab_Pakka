@@ -19,16 +19,18 @@ import { FiPlus, FiSearch, FiEye, FiEdit2, FiTrash2, FiHome, FiBriefcase } from 
 import { useGetProjectsQuery } from '../store/api/apiSlice';
 import CreateProjectModal from '../components/CreateProjectModal';
 import { useNavigate, Link } from 'react-router-dom';
+import { useDebounce } from '../hooks/useDebounce';
 
 const Projects = () => {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const { data, isLoading } = useGetProjectsQuery({
     page,
-    search: searchTerm,
+    search: debouncedSearch,
     limit: 9
   });
 

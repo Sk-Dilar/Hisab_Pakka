@@ -28,7 +28,10 @@ const CreateClientModal = ({ open, onClose }) => {
   const [createClient, { isLoading }] = useCreateClientMutation();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'phone' && value && !/^\d+$/.test(value)) return;
+    if (name === 'phone' && value.length > 10) return;
+    setFormData({ ...formData, [name]: value });
     setErrorMsg('');
   };
 
@@ -36,6 +39,11 @@ const CreateClientModal = ({ open, onClose }) => {
     e.preventDefault();
     if (!formData.name) {
       setErrorMsg('Name is required');
+      return;
+    }
+
+    if (formData.phone && !/^[6-9]\d{9}$/.test(formData.phone)) {
+      setErrorMsg('Please enter a valid 10-digit Indian phone number starting with 6-9');
       return;
     }
 
