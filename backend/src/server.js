@@ -17,7 +17,7 @@ const app = express();
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://hisab.vercel.app'],
+  origin: ['http://localhost:3000', 'https://hisab-pakka.vercel.app','https://hisab-super-admin.vercel.app'],
   credentials: true
 }));
 app.use(express.json());
