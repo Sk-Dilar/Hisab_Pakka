@@ -1,7 +1,7 @@
-const Project = require('../models/Project');
+import Project from '../models/Project.js';
 
 // Get all projects with pagination and search
-exports.getProjects = async (req, res) => {
+export const getProjects = async (req, res) => {
   try {
     const userId = req.user.id;
     const { page = 1, limit = 10, search = '', clientId, status } = req.query;
@@ -31,7 +31,7 @@ exports.getProjects = async (req, res) => {
 };
 
 // Get single project
-exports.getProject = async (req, res) => {
+export const getProject = async (req, res) => {
   try {
     const { id } = req.params;
     const project = await Project.findOne({ _id: id, userId: req.user.id }).populate('clientId', 'name companyName email');
@@ -43,7 +43,7 @@ exports.getProject = async (req, res) => {
 };
 
 // Create project
-exports.createProject = async (req, res) => {
+export const createProject = async (req, res) => {
   try {
     const { clientId, title, description, status } = req.body;
     const project = await Project.create({
@@ -60,7 +60,7 @@ exports.createProject = async (req, res) => {
 };
 
 // Update project
-exports.updateProject = async (req, res) => {
+export const updateProject = async (req, res) => {
   try {
     const { id } = req.params;
     const project = await Project.findOneAndUpdate(
@@ -76,7 +76,7 @@ exports.updateProject = async (req, res) => {
 };
 
 // Delete project
-exports.deleteProject = async (req, res) => {
+export const deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
     const project = await Project.findOneAndDelete({ _id: id, userId: req.user.id });

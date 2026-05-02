@@ -1,6 +1,6 @@
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const User = require("../models/User");
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import User from "../models/User.js";
 
 // Generate JWT Token
 const generateToken = (userId) => {
@@ -10,7 +10,7 @@ const generateToken = (userId) => {
 };
 
 // Register User
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -50,7 +50,7 @@ exports.register = async (req, res) => {
 };
 
 // Login User
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -93,7 +93,7 @@ exports.login = async (req, res) => {
 };
 
 // Forgot Password - Generate Reset Token
-exports.forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -142,7 +142,7 @@ exports.forgotPassword = async (req, res) => {
 };
 
 // Reset Password - Using Reset Token
-exports.resetPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
 
@@ -188,7 +188,7 @@ exports.resetPassword = async (req, res) => {
 };
 
 // Update User Profile
-exports.updateProfile = async (req, res) => {
+export const updateProfile = async (req, res) => {
   try {
     const { name, phone } = req.body;
     const user = await User.findById(req.user.id);

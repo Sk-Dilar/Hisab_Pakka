@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
-const WorkItem = require('../models/WorkItem');
-const Client = require('../models/Client');
+import mongoose from 'mongoose';
+import WorkItem from '../models/WorkItem.js';
+import Client from '../models/Client.js';
 
 // Get work items (with filters for client or project)
-exports.getWorkItems = async (req, res) => {
+export const getWorkItems = async (req, res) => {
   try {
     const userId = req.user.id;
     const { page = 1, limit = 20, clientId, projectId, billed } = req.query;
@@ -28,7 +28,7 @@ exports.getWorkItems = async (req, res) => {
 };
 
 // Add Work Item (Transactional)
-exports.addWorkItem = async (req, res) => {
+export const addWorkItem = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -76,7 +76,7 @@ exports.addWorkItem = async (req, res) => {
 };
 
 // Delete Work Item (Transactional - revert balance)
-exports.deleteWorkItem = async (req, res) => {
+export const deleteWorkItem = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 

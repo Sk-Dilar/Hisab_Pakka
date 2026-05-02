@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const clientSchema = new mongoose.Schema({
   userId: {
@@ -47,4 +47,4 @@ const clientSchema = new mongoose.Schema({
 // Compound unique index: userId + email (email can be null but if provided must be unique per user)
 clientSchema.index({ userId: 1, email: 1 }, { unique: true, sparse: true });
 
-module.exports = mongoose.model('Client', clientSchema);
+export default mongoose.model('Client', clientSchema);

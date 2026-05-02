@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const workItemSchema = new mongoose.Schema({
   userId: {
@@ -45,4 +45,4 @@ const workItemSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('WorkItem', workItemSchema);
+export default mongoose.model('WorkItem', workItemSchema);

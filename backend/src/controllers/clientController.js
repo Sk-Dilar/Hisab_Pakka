@@ -1,7 +1,7 @@
-const Client = require('../models/Client');
+import Client from '../models/Client.js';
 
 // Get all clients with pagination and search
-exports.getClients = async (req, res) => {
+export const getClients = async (req, res) => {
   try {
     const userId = req.user.id;
     const { page = 1, limit = 10, search = '', status = 'active' } = req.query;
@@ -42,7 +42,7 @@ exports.getClients = async (req, res) => {
 };
 
 // Get single client
-exports.getClient = async (req, res) => {
+export const getClient = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -64,7 +64,7 @@ exports.getClient = async (req, res) => {
 };
 
 // Create client
-exports.createClient = async (req, res) => {
+export const createClient = async (req, res) => {
   try {
     const userId = req.user.id;
     const { name, email, phone, companyName } = req.body;
@@ -109,7 +109,7 @@ exports.createClient = async (req, res) => {
 };
 
 // Update client
-exports.updateClient = async (req, res) => {
+export const updateClient = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -154,7 +154,7 @@ exports.updateClient = async (req, res) => {
 };
 
 // Delete client
-exports.deleteClient = async (req, res) => {
+export const deleteClient = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -179,7 +179,7 @@ exports.deleteClient = async (req, res) => {
 };
 
 // Restore client
-exports.restoreClient = async (req, res) => {
+export const restoreClient = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;

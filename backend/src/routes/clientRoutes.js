@@ -1,8 +1,9 @@
-const express = require('express');
+import express from 'express';
+import { body } from 'express-validator';
+import * as clientController from '../controllers/clientController.js';
+import { protect } from '../middleware/authMiddleware.js';
+
 const router = express.Router();
-const { body } = require('express-validator');
-const clientController = require('../controllers/clientController');
-const { protect } = require('../middleware/authMiddleware');
 
 // All routes are protected
 router.use(protect);
@@ -30,4 +31,4 @@ router.put('/:id', updateClientValidation, clientController.updateClient);
 router.delete('/:id', clientController.deleteClient);
 router.put('/:id/restore', clientController.restoreClient);
 
-module.exports = router;
+export default router;

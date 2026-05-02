@@ -1,8 +1,9 @@
-const express = require("express");
+import express from "express";
+import { body } from "express-validator";
+import * as authController from "../controllers/authController.js";
+import { protect } from "../middleware/authMiddleware.js";
+
 const router = express.Router();
-const { body } = require("express-validator");
-const authController = require("../controllers/authController");
-const { protect } = require("../middleware/authMiddleware");
 
 // Validation rules
 const registerValidation = [
@@ -56,4 +57,4 @@ router.post(
 );
 router.post("/update-profile", protect, authController.updateProfile);
 
-module.exports = router;
+export default router;

@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import * as workItemController from '../controllers/workItemController.js';
+import { protect } from '../middleware/authMiddleware.js';
+
 const router = express.Router();
-const workItemController = require('../controllers/workItemController');
-const { protect } = require('../middleware/authMiddleware');
 
 router.use(protect);
 
@@ -9,4 +10,4 @@ router.get('/', workItemController.getWorkItems);
 router.post('/', workItemController.addWorkItem);
 router.delete('/:id', workItemController.deleteWorkItem);
 
-module.exports = router;
+export default router;

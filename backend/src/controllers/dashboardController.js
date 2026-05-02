@@ -1,8 +1,8 @@
-const Client = require('../models/Client');
-const Project = require('../models/Project');
-const WorkItem = require('../models/WorkItem');
+import Client from '../models/Client.js';
+import Project from '../models/Project.js';
+import WorkItem from '../models/WorkItem.js';
 
-exports.getStats = async (req, res) => {
+export const getStats = async (req, res) => {
   try {
     const userId = req.user.id;
 

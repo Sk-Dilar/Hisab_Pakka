@@ -1,16 +1,16 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const helmet = require("helmet");
-const dotenv = require("dotenv");
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import helmet from "helmet";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-const authRoutes = require("./routes/authRoutes");
-const clientRoutes = require("./routes/clientRoutes");
-const dashboardRoutes = require("./routes/dashboardRoutes");
-const projectRoutes = require("./routes/projectRoutes");
-const workItemRoutes = require("./routes/workItemRoutes");
+import authRoutes from "./routes/authRoutes.js";
+import clientRoutes from "./routes/clientRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import workItemRoutes from "./routes/workItemRoutes.js";
 
 const app = express();
 
