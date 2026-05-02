@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { FiMenu, FiBell, FiUser } from 'react-icons/fi';
+import { FiMenu, FiBell, FiSearch } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
 
 const AppLayout = () => {
@@ -10,42 +10,53 @@ const AppLayout = () => {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  const initials = user?.name
+    ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+    : 'U';
+
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-bg overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
-          <button 
-            onClick={toggleSidebar}
-            className="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none"
-          >
-            <FiMenu size={24} />
-          </button>
-
-          <div className="flex-1"></div>
-
-          <div className="flex items-center space-x-4">
-            <button className="text-gray-500 hover:text-gray-700 relative">
-              <FiBell size={20} />
-              <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+        <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-6 z-10 flex-shrink-0 shadow-sm">
+          {/* Left: hamburger + page title area */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={toggleSidebar}
+              className="lg:hidden text-slate-500 hover:text-slate-800 p-2 rounded-xl hover:bg-slate-100"
+            >
+              <FiMenu size={20} />
             </button>
-            
-            <div className="flex items-center space-x-2 border-l pl-4 border-gray-200">
+          </div>
+
+          {/* Right: actions */}
+          <div className="flex items-center gap-3">
+            {/* Notification */}
+            <button className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100">
+              <FiBell size={19} />
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full border-2 border-white" />
+            </button>
+
+            {/* Divider */}
+            <div className="h-8 w-px bg-slate-200" />
+
+            {/* User pill */}
+            <div className="flex items-center gap-2.5 pl-1">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.plan || 'Free Plan'}</p>
+                <p className="text-sm font-semibold text-slate-800 leading-tight">{user?.name}</p>
+                <p className="text-xs text-slate-400 capitalize">{user?.plan || 'Free'}</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-primary bg-opacity-10 flex items-center justify-center text-primary font-bold">
-                {user?.name?.charAt(0).toUpperCase()}
+              <div className="h-9 w-9 rounded-xl bg-[#1a1f36] flex items-center justify-center text-[#a9fd6e] font-bold text-sm flex-shrink-0">
+                {initials}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
