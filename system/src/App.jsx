@@ -13,6 +13,7 @@ import Clients from "./pages/Clients";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import Settings from "./pages/Settings";
+import Invoices from "./pages/Invoices";
 
 function App() {
   const dispatch = useDispatch();
@@ -42,6 +43,7 @@ function App() {
           <Route path="clients" element={<Clients />} />
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:id" element={<ProjectDetails />} />
+          <Route path="invoices" element={<Invoices />} />
           <Route path="settings" element={<Settings />} />
           {/* Future routes will be added here */}
           <Route path="*" element={<Dashboard />} />

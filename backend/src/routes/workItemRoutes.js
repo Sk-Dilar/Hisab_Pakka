@@ -8,6 +8,7 @@ router.use(protect);
 
 router.get('/', workItemController.getWorkItems);
 router.post('/', workItemController.addWorkItem);
+router.put('/:id', workItemController.updateWorkItem);
 router.delete('/:id', workItemController.deleteWorkItem);
 
 export default router;

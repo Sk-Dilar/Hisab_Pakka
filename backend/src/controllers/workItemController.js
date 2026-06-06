@@ -113,3 +113,53 @@ export const deleteWorkItem = async (req, res) => {
     res.status(500).json({ message: 'Failed to delete work item' });
   }
 };
+
+// Update Work Item (Transactional - adjust balance)
+export const updateWorkItem = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const { title, quantity, rate } = req.body;
+
+    const workItem = await WorkItem.findOne({ _id: id, userId });
+    if (!workItem) {
+      return res.status(404).json({ message: 'Work item not found' });
+    }
+
+    if (workItem.billed) {
+      return res.status(400).json({ message: 'Cannot edit a billed work item' });
+    }
+
+    const oldTotalAmount = workItem.totalAmount;
+    const newTotalAmount = quantity * rate;
+    const difference = newTotalAmount - oldTotalAmount;
+
+    // 1. Update WorkItem
+    workItem.title = title || workItem.title;
+    workItem.quantity = quantity;
+    workItem.rate = rate;
+    workItem.totalAmount = newTotalAmount;
+    await workItem.save({ session });
+
+    // 2. Adjust Client Balance
+    if (difference !== 0) {
+      await Client.findOneAndUpdate(
+        { _id: workItem.clientId, userId },
+        { $inc: { currentBalance: difference } },
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json(workItem);
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    res.status(500).json({ message: 'Failed to update work item', error: error.message });
+  }
+};

@@ -84,6 +84,24 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: [{ type: 'Project', id: 'LIST' }],
     }),
+    updateProject: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/projects/${id}`,
+        method: 'PUT',
+        data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Project', id },
+        { type: 'Project', id: 'LIST' },
+      ],
+    }),
+    deleteProject: builder.mutation({
+      query: (id) => ({
+        url: `/projects/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Project', id: 'LIST' }],
+    }),
     getWorkItems: builder.query({
       query: (params) => ({
         url: '/work-items',
@@ -107,6 +125,18 @@ export const apiSlice = createApi({
       invalidatesTags: [
         { type: 'WorkItem', id: 'LIST' },
         { type: 'Client', id: 'LIST' }, // Balance changes
+        'Project'
+      ],
+    }),
+    updateWorkItem: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/work-items/${id}`,
+        method: 'PUT',
+        data,
+      }),
+      invalidatesTags: [
+        { type: 'WorkItem', id: 'LIST' },
+        { type: 'Client', id: 'LIST' }, // Balance might change
         'Project'
       ],
     }),
@@ -134,6 +164,48 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: [{ type: 'Client', id: 'LIST' }],
     }),
+    getInvoices: builder.query({
+      query: (params) => ({
+        url: '/invoices',
+        method: 'GET',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.invoices.map(({ _id }) => ({ type: 'Invoice', id: _id })),
+              { type: 'Invoice', id: 'LIST' },
+            ]
+          : [{ type: 'Invoice', id: 'LIST' }],
+    }),
+    getInvoice: builder.query({
+      query: (id) => `/invoices/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Invoice', id }],
+    }),
+    generateInvoice: builder.mutation({
+      query: (data) => ({
+        url: '/invoices/generate',
+        method: 'POST',
+        data,
+      }),
+      invalidatesTags: [
+        { type: 'Invoice', id: 'LIST' },
+        { type: 'WorkItem', id: 'LIST' }, // Work items get marked as billed
+        { type: 'Client', id: 'LIST' } // Client balance doesn't change on generation, but good practice
+      ],
+    }),
+    updateDiscount: builder.mutation({
+      query: ({ id, discount }) => ({
+        url: `/invoices/${id}/discount`,
+        method: 'PUT',
+        data: { discount },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Invoice', id },
+        { type: 'Invoice', id: 'LIST' },
+        { type: 'Client', id: 'LIST' } // Client balance changes when discount is edited
+      ],
+    }),
   }),
 });
 
@@ -144,9 +216,16 @@ export const {
   useGetProjectsQuery,
   useGetProjectQuery,
   useCreateProjectMutation,
+  useUpdateProjectMutation,
+  useDeleteProjectMutation,
   useGetWorkItemsQuery,
   useAddWorkItemMutation,
+  useUpdateWorkItemMutation,
   useDeleteWorkItemMutation,
   useDeleteClientMutation,
   useRestoreClientMutation,
+  useGetInvoicesQuery,
+  useGetInvoiceQuery,
+  useGenerateInvoiceMutation,
+  useUpdateDiscountMutation,
 } = apiSlice;

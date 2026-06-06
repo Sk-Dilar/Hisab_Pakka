@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
-  FiArrowLeft, FiPlus, FiTrash2, FiClock, FiCheckCircle, FiAlertCircle, FiDollarSign, FiCalendar, FiUser
+  FiArrowLeft, FiPlus, FiTrash2, FiClock, FiCheckCircle, FiAlertCircle, FiDollarSign, FiCalendar, FiUser, FiEdit2, FiMoreVertical
 } from 'react-icons/fi';
 import { 
   useGetProjectQuery, 
   useGetWorkItemsQuery, 
-  useDeleteWorkItemMutation 
+  useDeleteWorkItemMutation,
+  useDeleteProjectMutation
 } from '../store/api/apiSlice';
 import AddWorkItemModal from '../components/AddWorkItemModal';
+import EditProjectModal from '../components/EditProjectModal';
+import EditWorkItemModal from '../components/EditWorkItemModal';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
@@ -21,16 +24,30 @@ const statusConfig = {
 
 const ProjectDetails = () => {
   const { id } = useParams();
+  const navigate = require('react-router-dom').useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditProjectOpen, setIsEditProjectOpen] = useState(false);
+  const [isEditWorkItemOpen, setIsEditWorkItemOpen] = useState(false);
+  const [selectedWorkItem, setSelectedWorkItem] = useState(null);
 
   const { data: project, isLoading: projectLoading } = useGetProjectQuery(id);
   const { data: workItemsData, isLoading: workItemsLoading } = useGetWorkItemsQuery({ projectId: id });
   const [deleteWorkItem] = useDeleteWorkItemMutation();
+  const [deleteProject] = useDeleteProjectMutation();
 
   const handleDeleteWorkItem = async (itemId) => {
     if (window.confirm('Delete this work item? This will revert the client balance.')) {
       try { await deleteWorkItem(itemId).unwrap(); }
       catch (err) { alert(err.data?.message || 'Failed to delete work item'); }
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+      try {
+        await deleteProject(id).unwrap();
+        navigate('/app/projects');
+      } catch (err) { alert(err.data?.message || 'Failed to delete project'); }
     }
   };
 
@@ -66,10 +83,20 @@ const ProjectDetails = () => {
         {/* project info */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-card border border-slate-200/60 p-6 space-y-4">
           <div className="flex items-start justify-between gap-4 flex-wrap">
-            <h1 className="text-xl font-extrabold text-[#1a1f36] leading-snug">{project.title}</h1>
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${cfg.color}`}>
-              <StatusIcon size={12} /> {project.status}
-            </span>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-extrabold text-[#1a1f36] leading-snug">{project.title}</h1>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${cfg.color}`}>
+                <StatusIcon size={12} /> {project.status}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setIsEditProjectOpen(true)} className="p-2 text-slate-400 hover:text-[#2e4ed2] hover:bg-blue-50 rounded-lg transition-colors" title="Edit Project">
+                <FiEdit2 size={16} />
+              </button>
+              <button onClick={handleDeleteProject} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete Project">
+                <FiTrash2 size={16} />
+              </button>
+            </div>
           </div>
           <p className="text-sm text-slate-500 leading-relaxed">
             {project.description || 'No description provided.'}
@@ -157,13 +184,22 @@ const ProjectDetails = () => {
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       {!item.billed && (
-                        <button
-                          onClick={() => handleDeleteWorkItem(item._id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                          title="Delete"
-                        >
-                          <FiTrash2 size={15} />
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => { setSelectedWorkItem(item); setIsEditWorkItemOpen(true); }}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-[#2e4ed2] hover:bg-blue-50 transition-colors"
+                            title="Edit"
+                          >
+                            <FiEdit2 size={15} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteWorkItem(item._id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                            title="Delete"
+                          >
+                            <FiTrash2 size={15} />
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -185,6 +221,18 @@ const ProjectDetails = () => {
         onClose={() => setIsModalOpen(false)}
         projectId={project._id}
         clientId={project.clientId?._id}
+      />
+
+      <EditProjectModal
+        open={isEditProjectOpen}
+        onClose={() => setIsEditProjectOpen(false)}
+        project={project}
+      />
+
+      <EditWorkItemModal
+        open={isEditWorkItemOpen}
+        onClose={() => { setIsEditWorkItemOpen(false); setSelectedWorkItem(null); }}
+        workItem={selectedWorkItem}
       />
     </div>
   );
