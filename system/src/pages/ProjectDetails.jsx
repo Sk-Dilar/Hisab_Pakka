@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   FiArrowLeft, FiPlus, FiTrash2, FiClock, FiCheckCircle, FiAlertCircle, FiDollarSign, FiCalendar, FiUser, FiEdit2, FiMoreVertical
 } from 'react-icons/fi';
@@ -24,14 +24,14 @@ const statusConfig = {
 
 const ProjectDetails = () => {
   const { id } = useParams();
-  const navigate = require('react-router-dom').useNavigate();
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditProjectOpen, setIsEditProjectOpen] = useState(false);
   const [isEditWorkItemOpen, setIsEditWorkItemOpen] = useState(false);
   const [selectedWorkItem, setSelectedWorkItem] = useState(null);
 
-  const { data: project, isLoading: projectLoading } = useGetProjectQuery(id);
-  const { data: workItemsData, isLoading: workItemsLoading } = useGetWorkItemsQuery({ projectId: id });
+  const { data: project, isLoading: projectLoading } = useGetProjectQuery(id, { skip: !id || id === 'undefined' });
+  const { data: workItemsData, isLoading: workItemsLoading } = useGetWorkItemsQuery({ projectId: id }, { skip: !id || id === 'undefined' });
   const [deleteWorkItem] = useDeleteWorkItemMutation();
   const [deleteProject] = useDeleteProjectMutation();
 

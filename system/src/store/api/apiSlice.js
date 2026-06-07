@@ -73,7 +73,10 @@ export const apiSlice = createApi({
           : [{ type: 'Project', id: 'LIST' }],
     }),
     getProject: builder.query({
-      query: (id) => `/projects/${id}`,
+      query: (id) => ({
+        url: `/projects/${id}`,
+        method: 'GET',
+      }),
       providesTags: (result, error, id) => [{ type: 'Project', id }],
     }),
     createProject: builder.mutation({
@@ -179,7 +182,10 @@ export const apiSlice = createApi({
           : [{ type: 'Invoice', id: 'LIST' }],
     }),
     getInvoice: builder.query({
-      query: (id) => `/invoices/${id}`,
+      query: (id) => ({
+        url: `/invoices/${id}`,
+        method: 'GET',
+      }),
       providesTags: (result, error, id) => [{ type: 'Invoice', id }],
     }),
     generateInvoice: builder.mutation({
@@ -206,6 +212,32 @@ export const apiSlice = createApi({
         { type: 'Client', id: 'LIST' } // Client balance changes when discount is edited
       ],
     }),
+    getPayments: builder.query({
+      query: (params) => ({
+        url: '/payments',
+        method: 'GET',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.payments.map(({ _id }) => ({ type: 'Payment', id: _id })),
+              { type: 'Payment', id: 'LIST' },
+            ]
+          : [{ type: 'Payment', id: 'LIST' }],
+    }),
+    addPayment: builder.mutation({
+      query: (data) => ({
+        url: '/payments',
+        method: 'POST',
+        data,
+      }),
+      invalidatesTags: [
+        { type: 'Payment', id: 'LIST' },
+        { type: 'Invoice', id: 'LIST' }, // Invoice status/paidAmount might change
+        { type: 'Client', id: 'LIST' } // Client balance decreases
+      ],
+    }),
   }),
 });
 
@@ -228,4 +260,6 @@ export const {
   useGetInvoiceQuery,
   useGenerateInvoiceMutation,
   useUpdateDiscountMutation,
+  useGetPaymentsQuery,
+  useAddPaymentMutation,
 } = apiSlice;

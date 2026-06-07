@@ -11,6 +11,8 @@ import clientRoutes from "./routes/clientRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import workItemRoutes from "./routes/workItemRoutes.js";
+import invoiceRoutes from './routes/invoiceRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 const app = express();
 
@@ -43,6 +45,8 @@ app.use("/api/clients", clientRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/work-items", workItemRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
