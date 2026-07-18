@@ -138,7 +138,7 @@ const ProjectDetails = () => {
 
       {/* work items */}
       <div className="bg-white rounded-2xl shadow-card border border-slate-200/60 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-wrap gap-2">
           <h2 className="font-bold text-[#1a1f36]">Work Items</h2>
           <button
             onClick={() => setIsModalOpen(true)}

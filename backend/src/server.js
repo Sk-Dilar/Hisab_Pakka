@@ -13,6 +13,7 @@ import projectRoutes from "./routes/projectRoutes.js";
 import workItemRoutes from "./routes/workItemRoutes.js";
 import invoiceRoutes from './routes/invoiceRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import superAdminRoutes from './routes/superAdminRoutes.js';
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/work-items", workItemRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/superadmin', superAdminRoutes);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

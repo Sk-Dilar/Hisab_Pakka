@@ -1,9 +1,18 @@
 import express from "express";
 import { body } from "express-validator";
+import rateLimit from "express-rate-limit";
 import * as authController from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { message: "Too many reset requests. Please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Validation rules
 const registerValidation = [
@@ -47,6 +56,7 @@ router.post("/register", registerValidation, authController.register);
 router.post("/login", loginValidation, authController.login);
 router.post(
   "/forgot-password",
+  forgotPasswordLimiter,
   forgotPasswordValidation,
   authController.forgotPassword,
 );

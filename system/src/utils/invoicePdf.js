@@ -11,6 +11,7 @@ const fmtDate = (d) =>
 
 const NAVY = [26, 31, 54];
 const ACCENT = [130, 200, 60];
+const ACCENT_DARK = [58, 122, 30];
 const GRAY = [100, 108, 125];
 const LIGHT_BG = [246, 248, 251];
 
@@ -35,20 +36,14 @@ export const generateInvoicePdf = async (invoice, user) => {
   const pageHeight = doc.internal.pageSize.getHeight();
   const marginX = 14;
 
-  // ── header band ──
+  // ── header band — the freelancer's own brand takes center stage here ──
   doc.setFillColor(...NAVY);
-  doc.rect(0, 0, pageWidth, 36, 'F');
+  doc.rect(0, 0, pageWidth, 32, 'F');
 
   doc.setTextColor(255, 255, 255);
   doc.setFont(undefined, 'bold');
-  doc.setFontSize(16);
-  doc.text(user?.name || 'Invoice', marginX, 16);
-  doc.setFont(undefined, 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(190, 196, 214);
-  let headerLeftY = 23;
-  if (user?.email) { doc.text(user.email, marginX, headerLeftY); headerLeftY += 5.5; }
-  if (user?.phone) { doc.text(user.phone, marginX, headerLeftY); }
+  doc.setFontSize(20);
+  doc.text(user?.name || 'Invoice', marginX, 20);
 
   doc.setFont(undefined, 'bold');
   doc.setFontSize(18);
@@ -58,18 +53,17 @@ export const generateInvoicePdf = async (invoice, user) => {
   doc.setFontSize(9);
   doc.setTextColor(220, 224, 235);
   doc.text(`No: ${invoice.invoiceNumber}`, pageWidth - marginX, 22, { align: 'right' });
-  doc.text(`Date: ${fmtDate(invoice.createdAt)}`, pageWidth - marginX, 27.5, { align: 'right' });
-  doc.text(`Status: ${invoice.status}`, pageWidth - marginX, 33, { align: 'right' });
+  doc.text(`Date: ${fmtDate(invoice.createdAt)}  •  ${invoice.status}`, pageWidth - marginX, 27.5, { align: 'right' });
 
   // ── bill to ──
   doc.setTextColor(...GRAY);
   doc.setFontSize(8.5);
-  doc.text('BILL TO', marginX, 50);
+  doc.text('BILL TO', marginX, 46);
 
   doc.setTextColor(...NAVY);
   doc.setFont(undefined, 'bold');
   doc.setFontSize(11.5);
-  let y = 57;
+  let y = 53;
   doc.text(client.name || '—', marginX, y);
 
   doc.setFont(undefined, 'normal');
@@ -112,24 +106,79 @@ export const generateInvoicePdf = async (invoice, user) => {
     { label: 'Discount', value: `- ${fmt(invoice.discount)}` },
     { label: 'Final Amount', value: fmt(invoice.finalAmount), bold: true },
     { label: 'Paid', value: fmt(invoice.paidAmount) },
-    { label: 'Amount Due', value: fmt(invoice.dueAmount), bold: true, accent: true },
   ];
 
-  let boxTop = doc.lastAutoTable.finalY + 8;
+  const boxTop = doc.lastAutoTable.finalY + 8;
+  const dueRowH = rowH + 3;
   doc.setFillColor(...LIGHT_BG);
   doc.roundedRect(boxX, boxTop, boxWidth, rows.length * rowH + 6, 2, 2, 'F');
 
   let ty = boxTop + rowH;
-  rows.forEach(({ label, value, bold, accent }) => {
+  rows.forEach(({ label, value, bold }) => {
     doc.setFont(undefined, bold ? 'bold' : 'normal');
     doc.setFontSize(bold ? 10.5 : 9.5);
-    doc.setTextColor(...(accent ? [30, 130, 76] : bold ? NAVY : GRAY));
+    doc.setTextColor(...(bold ? NAVY : GRAY));
     doc.text(label, boxX + 6, ty);
     doc.text(value, pageWidth - marginX - 6, ty, { align: 'right' });
     ty += rowH;
   });
 
-  // ── footer (every page) ──
+  // Amount Due gets its own highlighted bar, right under the box — the one
+  // number a client scanning the page should not be able to miss.
+  const dueTop = boxTop + rows.length * rowH + 6 + 3;
+  doc.setFillColor(...(invoice.dueAmount > 0 ? ACCENT : [219, 234, 254]));
+  doc.roundedRect(boxX, dueTop, boxWidth, dueRowH, 2, 2, 'F');
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(...(invoice.dueAmount > 0 ? ACCENT_DARK : [30, 64, 175]));
+  doc.text(invoice.dueAmount > 0 ? 'AMOUNT DUE' : 'PAID IN FULL', boxX + 6, dueTop + dueRowH / 2 + 3.2);
+  doc.text(fmt(invoice.dueAmount), pageWidth - marginX - 6, dueTop + dueRowH / 2 + 3.2, { align: 'right' });
+
+  // ── payment info + contact details (mirrors how the freelancer already bills clients) ──
+  let infoTop = dueTop + dueRowH + 14;
+  const infoBlockHeight = 32;
+  if (infoTop + infoBlockHeight > pageHeight - 22) {
+    doc.addPage();
+    infoTop = 20;
+  }
+
+  const leftX = marginX;
+  const rightX = pageWidth / 2 + 8;
+
+  if (user?.upiId) {
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...GRAY);
+    doc.text('PAYMENT INFO', leftX, infoTop);
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(...NAVY);
+    doc.text(`UPI ID: ${user.upiId}`, leftX, infoTop + 6.5);
+  }
+
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...GRAY);
+  doc.text('CONTACT DETAILS', rightX, infoTop);
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(9.5);
+  doc.setTextColor(...NAVY);
+  let contactY = infoTop + 6.5;
+  if (user?.email) { doc.text(user.email, rightX, contactY); contactY += 5.5; }
+  if (user?.phone) { doc.text(user.phone, rightX, contactY); }
+
+  // ── thank-you note ──
+  doc.setFont(undefined, 'italic');
+  doc.setFontSize(9.5);
+  doc.setTextColor(...GRAY);
+  doc.text(
+    'Thank you for your business — looking forward to working with you again!',
+    pageWidth / 2,
+    infoTop + 24,
+    { align: 'center' },
+  );
+
+  // ── footer (every page) — Hisab Pakka's own branding, kept small and last ──
   const logoDataUrl = await loadImageAsDataUrl(logoUrl);
   const pageCount = doc.internal.getNumberOfPages();
   const logoH = 7;

@@ -58,7 +58,14 @@ const Invoices = () => {
   return (
     <Box sx={{ animation: 'fadeIn 0.5s', p: { xs: 2, md: 0 } }}>
       {/* Header section */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'stretch', sm: 'center' },
+        justifyContent: 'space-between',
+        gap: 2,
+        mb: 3,
+      }}>
         <Box>
           <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
             <FiFileText size={14} /> / Invoices
@@ -67,16 +74,17 @@ const Invoices = () => {
             Invoices
           </Typography>
         </Box>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<FiPlus />}
           onClick={() => setIsGenerateModalOpen(true)}
-          sx={{ 
-            bgcolor: '#1a1f36', 
+          sx={{
+            bgcolor: '#1a1f36',
             borderRadius: '12px',
             textTransform: 'none',
             fontWeight: 600,
-            '&:hover': { bgcolor: '#242a45' } 
+            width: { xs: '100%', sm: 'auto' },
+            '&:hover': { bgcolor: '#242a45' }
           }}
         >
           Generate Invoice
@@ -92,7 +100,7 @@ const Invoices = () => {
         sx={{
           mb: 3,
           width: '100%',
-          maxWidth: 380,
+          maxWidth: { xs: '100%', sm: 380 },
           bgcolor: 'white',
           '& .MuiOutlinedInput-root': { borderRadius: '12px' },
         }}

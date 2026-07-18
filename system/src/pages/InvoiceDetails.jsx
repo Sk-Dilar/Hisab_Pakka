@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { FiArrowLeft, FiDownload, FiEdit2, FiUser, FiCalendar, FiHash } from 'react-icons/fi';
+import { FiArrowLeft, FiDownload, FiEdit2, FiUser, FiCalendar, FiHash, FiAlertCircle } from 'react-icons/fi';
 import { useGetInvoiceQuery } from '../store/api/apiSlice';
 import EditDiscountModal from '../components/EditDiscountModal';
 import { generateInvoicePdf } from '../utils/invoicePdf';
@@ -103,6 +103,16 @@ const InvoiceDetails = () => {
           </div>
         </div>
       </div>
+
+      {!user?.upiId && (
+        <div className="flex items-center gap-2.5 bg-amber-50 border border-amber-200 text-amber-800 text-sm px-4 py-3 rounded-xl">
+          <FiAlertCircle size={16} className="flex-shrink-0" />
+          <span>
+            You haven't added a UPI ID yet, so the PDF won't show clients where to pay you.{' '}
+            <Link to="/app/settings" className="font-semibold underline underline-offset-2">Add one in Settings →</Link>
+          </span>
+        </div>
+      )}
 
       {/* items + totals */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -36,7 +36,14 @@ const Payments = () => {
   return (
     <Box sx={{ animation: 'fadeIn 0.5s', p: { xs: 2, md: 0 } }}>
       {/* Header section */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'stretch', sm: 'center' },
+        justifyContent: 'space-between',
+        gap: 2,
+        mb: 3,
+      }}>
         <Box>
           <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
             <FiDollarSign size={14} /> / Payments
@@ -45,16 +52,17 @@ const Payments = () => {
             Payments
           </Typography>
         </Box>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<FiPlus />}
           onClick={() => setIsRecordModalOpen(true)}
-          sx={{ 
-            bgcolor: '#1a1f36', 
+          sx={{
+            bgcolor: '#1a1f36',
             borderRadius: '12px',
             textTransform: 'none',
             fontWeight: 600,
-            '&:hover': { bgcolor: '#242a45' } 
+            width: { xs: '100%', sm: 'auto' },
+            '&:hover': { bgcolor: '#242a45' }
           }}
         >
           Record Payment

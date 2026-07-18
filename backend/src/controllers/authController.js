@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import User from "../models/User.js";
+import { createPasswordResetToken } from "../utils/passwordReset.js";
 
 // Generate JWT Token
 const generateToken = (userId) => {
@@ -38,6 +38,8 @@ export const register = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        upiId: user.upiId,
         plan: user.plan,
       },
     });
@@ -83,6 +85,8 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        upiId: user.upiId,
         plan: user.plan,
       },
     });
@@ -111,24 +115,15 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
-
-    // Set token and expiration (1 hour from now)
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
-    await user.save();
-
-    // In a real application, you would send an email with the reset link
-    // For now, we'll return the token in the response (for development)
-    const resetLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/forgot-password?token=${resetToken}`;
-
-    // TODO: Send email with resetLink using nodemailer or similar
-    console.log("Password Reset Link:", resetLink);
+    // Delivery is admin-mediated (see superAdminController.generateResetLink) —
+    // the link is never sent back over this public endpoint.
+    const { resetLink } = await createPasswordResetToken(user);
+    if (process.env.NODE_ENV === "development") {
+      console.log("Password Reset Link:", resetLink);
+    }
 
     res.status(200).json({
       message: "Password reset link has been sent to your email",
-      resetLink: resetLink, // Remove this in production
     });
   } catch (error) {
     console.error("Forgot Password Error:", error);
@@ -190,7 +185,7 @@ export const resetPassword = async (req, res) => {
 // Update User Profile
 export const updateProfile = async (req, res) => {
   try {
-    const { name, phone } = req.body;
+    const { name, phone, upiId } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -199,6 +194,7 @@ export const updateProfile = async (req, res) => {
 
     if (name) user.name = name;
     if (phone !== undefined) user.phone = phone;
+    if (upiId !== undefined) user.upiId = upiId || undefined;
 
     await user.save();
 
@@ -209,11 +205,15 @@ export const updateProfile = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        upiId: user.upiId,
         plan: user.plan,
       },
     });
   } catch (error) {
     console.error("Update Profile Error:", error);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: Object.values(error.errors)[0].message });
+    }
     res.status(500).json({ message: "Failed to update profile" });
   }
 };

@@ -27,6 +27,17 @@ const userSchema = new mongoose.Schema({
     trim: true,
     default: "",
   },
+  upiId: {
+    type: String,
+    trim: true,
+    // custom validator (not `match`) so an empty/unset value is never checked
+    // against the regex — avoids the same "optional field becomes required"
+    // trap as Client.email (see clientController for the full story)
+    validate: {
+      validator: (v) => !v || /^[\w.+-]{2,256}@[a-zA-Z]{2,64}$/.test(v),
+      message: "Please enter a valid UPI ID",
+    },
+  },
   plan: {
     type: String,
     enum: ["free", "pro", "enterprise"],

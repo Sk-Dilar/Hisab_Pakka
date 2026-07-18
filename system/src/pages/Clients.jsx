@@ -110,11 +110,11 @@ const Clients = () => {
             <FiUsers size={12} /> Clients
           </span>
         </nav>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h1 className="text-2xl font-extrabold text-[#1a1f36]">Clients</h1>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-[#1a1f36] hover:bg-[#242a45] text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-colors"
+            className="flex items-center justify-center gap-2 bg-[#1a1f36] hover:bg-[#242a45] text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-colors w-full sm:w-auto"
           >
             <FiPlus size={16} /> Create Client
           </button>

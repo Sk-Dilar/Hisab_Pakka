@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiUser, FiHome, FiSettings, FiSave, FiMail, FiPhone, FiShield } from 'react-icons/fi';
+import { FiUser, FiHome, FiSettings, FiSave, FiMail, FiPhone, FiShield, FiCreditCard } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateProfileAsync, clearSuccessMessage, clearError } from '../store/slices/authSlice';
 
@@ -20,7 +20,11 @@ const InputField = ({ label, icon: Icon, error, helper, ...props }) => (
           }`}
       />
     </div>
-    {helper && <p className="text-xs text-slate-400">{helper}</p>}
+    {error ? (
+      <p className="text-xs text-red-500">{error}</p>
+    ) : helper ? (
+      <p className="text-xs text-slate-400">{helper}</p>
+    ) : null}
   </div>
 );
 
@@ -32,15 +36,24 @@ const Settings = () => {
     name:  user?.name  || '',
     email: user?.email || '',
     phone: user?.phone || '',
+    upiId: user?.upiId || '',
   });
+  const [upiError, setUpiError] = useState('');
 
   useEffect(() => () => { dispatch(clearSuccessMessage()); dispatch(clearError()); }, [dispatch]);
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'upiId') setUpiError('');
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(updateProfileAsync({ name: formData.name, phone: formData.phone }));
+    if (formData.upiId && !/^[\w.+-]{2,256}@[a-zA-Z]{2,64}$/.test(formData.upiId)) {
+      setUpiError('Enter a valid UPI ID, e.g. yourname@okbank');
+      return;
+    }
+    dispatch(updateProfileAsync({ name: formData.name, phone: formData.phone, upiId: formData.upiId }));
   };
 
   const initials = user?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
@@ -115,6 +128,17 @@ const Settings = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+91 98765 43210"
+              />
+              <InputField
+                label="UPI ID (optional)"
+                icon={FiCreditCard}
+                name="upiId"
+                type="text"
+                value={formData.upiId}
+                onChange={handleChange}
+                placeholder="yourname@okbank"
+                error={upiError}
+                helper={!upiError ? 'Shown on invoices so clients know where to pay you' : undefined}
               />
             </div>
 
