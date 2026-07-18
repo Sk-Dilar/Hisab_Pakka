@@ -39,6 +39,7 @@ export const register = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        tagline: user.tagline,
         upiId: user.upiId,
         plan: user.plan,
       },
@@ -86,6 +87,7 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        tagline: user.tagline,
         upiId: user.upiId,
         plan: user.plan,
       },
@@ -185,7 +187,7 @@ export const resetPassword = async (req, res) => {
 // Update User Profile
 export const updateProfile = async (req, res) => {
   try {
-    const { name, phone, upiId } = req.body;
+    const { name, phone, tagline, upiId } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -194,6 +196,7 @@ export const updateProfile = async (req, res) => {
 
     if (name) user.name = name;
     if (phone !== undefined) user.phone = phone;
+    if (tagline !== undefined) user.tagline = tagline;
     if (upiId !== undefined) user.upiId = upiId || undefined;
 
     await user.save();
@@ -205,6 +208,7 @@ export const updateProfile = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        tagline: user.tagline,
         upiId: user.upiId,
         plan: user.plan,
       },

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiUser, FiHome, FiSettings, FiSave, FiMail, FiPhone, FiShield, FiCreditCard } from 'react-icons/fi';
+import { FiUser, FiHome, FiSettings, FiSave, FiMail, FiPhone, FiShield, FiCreditCard, FiBriefcase } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateProfileAsync, clearSuccessMessage, clearError } from '../store/slices/authSlice';
 
@@ -33,10 +33,11 @@ const Settings = () => {
   const { user, loading, error, successMessage } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
-    name:  user?.name  || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    upiId: user?.upiId || '',
+    name:    user?.name    || '',
+    email:   user?.email   || '',
+    phone:   user?.phone   || '',
+    tagline: user?.tagline || '',
+    upiId:   user?.upiId   || '',
   });
   const [upiError, setUpiError] = useState('');
 
@@ -53,7 +54,7 @@ const Settings = () => {
       setUpiError('Enter a valid UPI ID, e.g. yourname@okbank');
       return;
     }
-    dispatch(updateProfileAsync({ name: formData.name, phone: formData.phone, upiId: formData.upiId }));
+    dispatch(updateProfileAsync({ name: formData.name, phone: formData.phone, tagline: formData.tagline, upiId: formData.upiId }));
   };
 
   const initials = user?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
@@ -128,6 +129,17 @@ const Settings = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="+91 98765 43210"
+              />
+              <InputField
+                label="Tagline / Profession"
+                icon={FiBriefcase}
+                name="tagline"
+                type="text"
+                value={formData.tagline}
+                onChange={handleChange}
+                placeholder="Freelance Graphic Designer & Illustrator"
+                maxLength={80}
+                helper="Shown under your name on invoices"
               />
               <InputField
                 label="UPI ID (optional)"

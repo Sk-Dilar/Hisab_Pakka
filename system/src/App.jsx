@@ -19,6 +19,7 @@ import Invoices from "./pages/Invoices";
 import InvoiceDetails from "./pages/InvoiceDetails";
 import Payments from "./pages/Payments";
 import PaymentDetails from "./pages/PaymentDetails";
+import InvoicePreview from "./pages/InvoicePreview"; // TEMP: invoice PDF design preview
 
 function App() {
   const dispatch = useDispatch();
@@ -55,6 +56,8 @@ function App() {
           <Route path="payments" element={<Payments />} />
           <Route path="payments/:id" element={<PaymentDetails />} />
           <Route path="settings" element={<Settings />} />
+          {/* TEMP: invoice PDF design-preview page — remove once design is finalized */}
+          <Route path="invoice-preview" element={<InvoicePreview />} />
           {/* Future routes will be added here */}
           <Route path="*" element={<Dashboard />} />
         </Route>

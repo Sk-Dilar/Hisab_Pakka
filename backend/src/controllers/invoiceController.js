@@ -29,7 +29,7 @@ export const getInvoices = async (req, res) => {
 
     const total = await Invoice.countDocuments(query);
     const invoices = await Invoice.find(query)
-      .populate('clientId', 'name companyName')
+      .populate('clientId', 'name companyName email phone')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);

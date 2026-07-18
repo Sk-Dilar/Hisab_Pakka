@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema({
     trim: true,
     default: "",
   },
+  tagline: {
+    type: String,
+    trim: true,
+    default: "",
+    maxlength: [80, "Tagline cannot exceed 80 characters"],
+  },
   upiId: {
     type: String,
     trim: true,
