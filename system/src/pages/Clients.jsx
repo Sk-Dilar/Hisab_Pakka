@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { FiSearch, FiPlus, FiTrash2, FiEye, FiHome, FiUsers, FiRefreshCw } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { FiSearch, FiPlus, FiTrash2, FiEye, FiEdit2, FiHome, FiUsers, FiRefreshCw } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
 import { useGetClientsQuery, useDeleteClientMutation, useRestoreClientMutation } from '../store/api/apiSlice';
 import CreateClientModal from '../components/CreateClientModal';
+import EditClientModal from '../components/EditClientModal';
 import { useDebounce } from '../hooks/useDebounce';
 
 /* ── helpers ─────────────────────────────────────── */
@@ -56,9 +57,11 @@ const Clients = () => {
   const [status, setStatus]           = useState('active');
   const debouncedSearch               = useDebounce(searchTerm, 500);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState(null);
   const [deleteClient]                = useDeleteClientMutation();
   const [restoreClient]               = useRestoreClientMutation();
   const [confirm, setConfirm]         = useState(null);
+  const navigate                      = useNavigate();
 
   const { data, isLoading } = useGetClientsQuery({
     page,
@@ -173,7 +176,11 @@ const Clients = () => {
                 ))
               ) : data?.clients?.length > 0 ? (
                 data.clients.map((client) => (
-                  <tr key={client._id} className="hover:bg-slate-50/80 transition-colors group">
+                  <tr
+                    key={client._id}
+                    onClick={() => navigate(`/app/clients/${client._id}`)}
+                    className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                  >
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <Avatar name={client.name} />
@@ -191,13 +198,21 @@ const Clients = () => {
                     <td className="px-5 py-3.5 text-right">
                       <BalanceBadge amount={client.currentBalance} />
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-center gap-1">
                         <button
                           title="View"
+                          onClick={() => navigate(`/app/clients/${client._id}`)}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-[#2e4ed2] hover:bg-blue-50 transition-colors"
                         >
                           <FiEye size={15} />
+                        </button>
+                        <button
+                          title="Edit"
+                          onClick={() => setEditingClient(client)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#2e4ed2] hover:bg-blue-50 transition-colors"
+                        >
+                          <FiEdit2 size={15} />
                         </button>
                         {client.status === 'inactive' ? (
                           <button
@@ -264,6 +279,12 @@ const Clients = () => {
       </div>
 
       <CreateClientModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      <EditClientModal
+        open={!!editingClient}
+        onClose={() => setEditingClient(null)}
+        client={editingClient}
+      />
 
       {confirm && (
         <ConfirmModal

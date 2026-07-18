@@ -12,7 +12,10 @@ const statusStyles = {
 };
 
 const ProjectCard = ({ project, onView }) => (
-  <div className="bg-white rounded-2xl shadow-card border border-slate-200/60 hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 flex flex-col overflow-hidden group">
+  <div
+    onClick={onView}
+    className="bg-white rounded-2xl shadow-card border border-slate-200/60 hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 flex flex-col overflow-hidden group cursor-pointer"
+  >
     {/* card accent stripe */}
     <div className={`h-1 w-full ${project.status === 'Finished' ? 'bg-emerald-400' : project.status === 'On Hold' ? 'bg-amber-400' : 'bg-[#2e4ed2]'}`} />
     <div className="p-5 flex flex-col flex-1">

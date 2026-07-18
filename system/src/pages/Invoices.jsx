@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { 
-  Box, Typography, Paper, Tooltip, IconButton, Chip, CircularProgress, 
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-  TablePagination, TextField, Button, Grid
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import {
+  Box, Typography, Paper, Tooltip, IconButton, Chip, CircularProgress,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TablePagination, TextField, Button, InputAdornment
 } from '@mui/material';
-import { FiFileText, FiPlus, FiEye, FiEdit2 } from 'react-icons/fi';
+import { FiFileText, FiPlus, FiEye, FiEdit2, FiSearch, FiDownload } from 'react-icons/fi';
 import { useGetInvoicesQuery } from '../store/api/apiSlice';
 import GenerateInvoiceModal from '../components/GenerateInvoiceModal';
 import EditDiscountModal from '../components/EditDiscountModal';
 import { useDebounce } from '../hooks/useDebounce';
+import { generateInvoicePdf } from '../utils/invoicePdf';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
@@ -18,6 +21,8 @@ const Invoices = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
+  const navigate = useNavigate();
+  const { user } = useSelector((s) => s.auth);
 
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [discountModalInvoice, setDiscountModalInvoice] = useState(null);
@@ -25,7 +30,7 @@ const Invoices = () => {
   const { data, isLoading } = useGetInvoicesQuery({
     page: page + 1,
     limit: rowsPerPage,
-    // Add debouncedSearch to API call if backend supports searching invoices by client name/number
+    search: debouncedSearch,
   });
 
   const handleChangePage = (event, newPage) => {
@@ -37,10 +42,6 @@ const Invoices = () => {
     setPage(0);
   };
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    setPage(0);
-  };
 
   const getStatusChipColor = (paid, finalAmt) => {
     if (paid === 0) return 'error'; // Unpaid
@@ -82,6 +83,28 @@ const Invoices = () => {
         </Button>
       </Box>
 
+      {/* Search */}
+      <TextField
+        placeholder="Search by invoice number or client name..."
+        value={searchTerm}
+        onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
+        size="small"
+        sx={{
+          mb: 3,
+          width: '100%',
+          maxWidth: 380,
+          bgcolor: 'white',
+          '& .MuiOutlinedInput-root': { borderRadius: '12px' },
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <FiSearch size={16} color="#94a3b8" />
+            </InputAdornment>
+          ),
+        }}
+      />
+
       {/* Data Section */}
       <Paper elevation={0} sx={{ borderRadius: '16px', border: '1px solid rgba(226, 232, 240, 0.6)', overflow: 'hidden' }}>
         <TableContainer>
@@ -105,7 +128,12 @@ const Invoices = () => {
                 </TableRow>
               ) : data?.invoices?.length > 0 ? (
                 data.invoices.map((invoice) => (
-                  <TableRow key={invoice._id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableRow
+                    key={invoice._id}
+                    hover
+                    onClick={() => navigate(`/app/invoices/${invoice._id}`)}
+                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
                     <TableCell sx={{ fontWeight: 600, color: '#1a1f36' }}>{invoice.invoiceNumber}</TableCell>
                     <TableCell sx={{ color: '#64748b' }}>{invoice.clientId?.name || '—'}</TableCell>
                     <TableCell sx={{ color: '#64748b' }}>
@@ -122,17 +150,30 @@ const Invoices = () => {
                         sx={{ fontWeight: 600, fontSize: '0.75rem' }}
                       />
                     </TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>
+                    <TableCell sx={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
                       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
                         <Tooltip title="View Invoice">
-                          <IconButton size="small" sx={{ color: '#94a3b8', '&:hover': { color: '#2e4ed2', bgcolor: '#eff6ff' } }}>
+                          <IconButton
+                            size="small"
+                            onClick={() => navigate(`/app/invoices/${invoice._id}`)}
+                            sx={{ color: '#94a3b8', '&:hover': { color: '#2e4ed2', bgcolor: '#eff6ff' } }}
+                          >
                             <FiEye size={16} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Download PDF">
+                          <IconButton
+                            size="small"
+                            onClick={() => generateInvoicePdf(invoice, user)}
+                            sx={{ color: '#94a3b8', '&:hover': { color: '#1a1f36', bgcolor: '#f1f5f9' } }}
+                          >
+                            <FiDownload size={16} />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title={invoice.paidAmount > 0 ? "Cannot edit discount for paid invoices" : "Edit Discount"}>
                           <span style={{ display: 'inline-block' }}>
-                            <IconButton 
-                              size="small" 
+                            <IconButton
+                              size="small"
                               onClick={() => setDiscountModalInvoice(invoice)}
                               disabled={invoice.paidAmount > 0}
                               sx={{ color: '#94a3b8', '&:hover': { color: '#eab308', bgcolor: '#fefce8' } }}

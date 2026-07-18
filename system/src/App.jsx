@@ -10,11 +10,14 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AppLayout from "./components/AppLayout";
 import Clients from "./pages/Clients";
+import ClientDetails from "./pages/ClientDetails";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
 import Settings from "./pages/Settings";
 import Invoices from "./pages/Invoices";
+import InvoiceDetails from "./pages/InvoiceDetails";
 import Payments from "./pages/Payments";
+import PaymentDetails from "./pages/PaymentDetails";
 
 function App() {
   const dispatch = useDispatch();
@@ -42,10 +45,13 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="clients" element={<Clients />} />
+          <Route path="clients/:id" element={<ClientDetails />} />
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:id" element={<ProjectDetails />} />
           <Route path="invoices" element={<Invoices />} />
+          <Route path="invoices/:id" element={<InvoiceDetails />} />
           <Route path="payments" element={<Payments />} />
+          <Route path="payments/:id" element={<PaymentDetails />} />
           <Route path="settings" element={<Settings />} />
           {/* Future routes will be added here */}
           <Route path="*" element={<Dashboard />} />

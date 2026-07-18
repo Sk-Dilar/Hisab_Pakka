@@ -8,11 +8,23 @@ import User from '../models/User.js';
 export const getInvoices = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { page = 1, limit = 10, clientId, status } = req.query;
+    const { page = 1, limit = 10, clientId, status, search } = req.query;
 
     const query = { userId };
     if (clientId) query.clientId = clientId;
     if (status) query.status = status;
+
+    if (search) {
+      const matchingClients = await Client.find({
+        userId,
+        name: { $regex: search, $options: 'i' }
+      }).select('_id');
+
+      query.$or = [
+        { invoiceNumber: { $regex: search, $options: 'i' } },
+        { clientId: { $in: matchingClients.map((c) => c._id) } }
+      ];
+    }
 
     const total = await Invoice.countDocuments(query);
     const invoices = await Invoice.find(query)

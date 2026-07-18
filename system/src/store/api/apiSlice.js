@@ -153,6 +153,25 @@ export const apiSlice = createApi({
         { type: 'Client', id: 'LIST' }, // Balance changes
       ],
     }),
+    getClient: builder.query({
+      query: (id) => ({
+        url: `/clients/${id}`,
+        method: 'GET',
+      }),
+      transformResponse: (response) => response.client,
+      providesTags: (result, error, id) => [{ type: 'Client', id }],
+    }),
+    updateClient: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/clients/${id}`,
+        method: 'PUT',
+        data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Client', id },
+        { type: 'Client', id: 'LIST' },
+      ],
+    }),
     deleteClient: builder.mutation({
       query: (id) => ({
         url: `/clients/${id}`,
@@ -226,6 +245,13 @@ export const apiSlice = createApi({
             ]
           : [{ type: 'Payment', id: 'LIST' }],
     }),
+    getPayment: builder.query({
+      query: (id) => ({
+        url: `/payments/${id}`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, id) => [{ type: 'Payment', id }],
+    }),
     addPayment: builder.mutation({
       query: (data) => ({
         url: '/payments',
@@ -254,6 +280,8 @@ export const {
   useAddWorkItemMutation,
   useUpdateWorkItemMutation,
   useDeleteWorkItemMutation,
+  useGetClientQuery,
+  useUpdateClientMutation,
   useDeleteClientMutation,
   useRestoreClientMutation,
   useGetInvoicesQuery,
@@ -261,5 +289,6 @@ export const {
   useGenerateInvoiceMutation,
   useUpdateDiscountMutation,
   useGetPaymentsQuery,
+  useGetPaymentQuery,
   useAddPaymentMutation,
 } = apiSlice;

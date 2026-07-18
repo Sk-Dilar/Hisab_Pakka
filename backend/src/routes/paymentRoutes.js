@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/', paymentController.getPayments);
+router.get('/:id', paymentController.getPayment);
 router.post('/', paymentController.addPayment);
 
 export default router;

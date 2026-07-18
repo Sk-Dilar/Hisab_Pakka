@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Box, Typography, Paper, Button, Chip, CircularProgress, 
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
+import { useNavigate } from 'react-router-dom';
+import {
+  Box, Typography, Paper, Button, Chip, CircularProgress,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TablePagination
 } from '@mui/material';
 import { FiDollarSign, FiPlus } from 'react-icons/fi';
@@ -14,6 +15,7 @@ const fmt = (n) =>
 const Payments = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const navigate = useNavigate();
 
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
@@ -81,7 +83,12 @@ const Payments = () => {
                 </TableRow>
               ) : data?.payments?.length > 0 ? (
                 data.payments.map((payment) => (
-                  <TableRow key={payment._id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableRow
+                    key={payment._id}
+                    hover
+                    onClick={() => navigate(`/app/payments/${payment._id}`)}
+                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
                     <TableCell sx={{ color: '#64748b' }}>
                       {new Date(payment.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </TableCell>

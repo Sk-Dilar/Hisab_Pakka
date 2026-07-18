@@ -30,6 +30,26 @@ export const getPayments = async (req, res) => {
   }
 };
 
+// Get single payment
+export const getPayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const payment = await Payment.findOne({ _id: id, userId })
+      .populate('clientId', 'name companyName email phone')
+      .populate('allocations.invoiceId', 'invoiceNumber finalAmount status');
+
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment not found' });
+    }
+
+    res.status(200).json(payment);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch payment', error: error.message });
+  }
+};
+
 // Add Payment (FIFO Allocation)
 export const addPayment = async (req, res) => {
   const session = await mongoose.startSession();
