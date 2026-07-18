@@ -45,9 +45,9 @@ const EditClientModal = ({ open, onClose, client }) => {
 
   if (!open) return null;
 
-  const phoneErr  = formData.phone  && !/^[6-9]\d{9}$/.test(formData.phone)  ? 'Valid 10-digit Indian number required' : '';
+  const phoneErr  = !formData.phone.trim() ? '' : !/^[6-9]\d{9}$/.test(formData.phone) ? 'Valid 10-digit Indian number required' : '';
   const emailErr  = formData.email  && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? 'Enter a valid email address' : '';
-  const isValid   = formData.name.trim() && !phoneErr && !emailErr;
+  const isValid   = formData.name.trim() && formData.phone.trim() && !phoneErr && !emailErr;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +60,9 @@ const EditClientModal = ({ open, onClose, client }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) { setErrorMsg('Client name is required'); return; }
+    if (!formData.phone.trim()) { setErrorMsg('Phone number is required'); return; }
     if (phoneErr) { setErrorMsg(phoneErr); return; }
+    if (emailErr) { setErrorMsg(emailErr); return; }
     try {
       await updateClient({ id: client._id, ...formData }).unwrap();
       setSuccessMsg('Client updated successfully!');
@@ -100,15 +102,15 @@ const EditClientModal = ({ open, onClose, client }) => {
             <Field label="Client Name *" icon={FiUser} name="name" value={formData.name}
               onChange={handleChange} placeholder="Ravi Kumar" required />
 
-            <Field label="Email Address" icon={FiMail} type="email" name="email" value={formData.email}
-              onChange={handleChange} placeholder="ravi@example.com" error={emailErr} />
-
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Phone" icon={FiPhone} name="phone" value={formData.phone}
-                onChange={handleChange} placeholder="98765 43210" error={phoneErr} />
+              <Field label="Phone *" icon={FiPhone} name="phone" value={formData.phone}
+                onChange={handleChange} placeholder="98765 43210" error={phoneErr} required />
               <Field label="Company" icon={FiBriefcase} name="companyName" value={formData.companyName}
                 onChange={handleChange} placeholder="Acme Pvt Ltd" />
             </div>
+
+            <Field label="Email Address (optional)" icon={FiMail} type="email" name="email" value={formData.email}
+              onChange={handleChange} placeholder="ravi@example.com" error={emailErr} />
           </div>
 
           {/* footer */}

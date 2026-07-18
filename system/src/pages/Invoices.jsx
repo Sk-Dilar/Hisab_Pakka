@@ -164,7 +164,7 @@ const Invoices = () => {
                         <Tooltip title="Download PDF">
                           <IconButton
                             size="small"
-                            onClick={() => generateInvoicePdf(invoice, user)}
+                            onClick={() => generateInvoicePdf(invoice, user).catch(console.error)}
                             sx={{ color: '#94a3b8', '&:hover': { color: '#1a1f36', bgcolor: '#f1f5f9' } }}
                           >
                             <FiDownload size={16} />

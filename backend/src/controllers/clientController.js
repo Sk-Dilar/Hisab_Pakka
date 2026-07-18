@@ -74,6 +74,10 @@ export const createClient = async (req, res) => {
       return res.status(400).json({ message: 'Client name is required' });
     }
 
+    if (!phone) {
+      return res.status(400).json({ message: 'Phone number is required' });
+    }
+
     // Check if client with same email already exists for this user
     if (email) {
       const existingClient = await Client.findOne({ userId, email });
@@ -83,10 +87,13 @@ export const createClient = async (req, res) => {
     }
 
     // Create client
+    // (email is only set when provided — storing '' would trip the schema's
+    // regex validator and the sparse unique index, effectively forcing email
+    // to be "required" in practice)
     const client = await Client.create({
       userId,
       name,
-      email,
+      email: email || undefined,
       phone,
       companyName,
       currentBalance: 0
@@ -131,8 +138,9 @@ export const updateClient = async (req, res) => {
     }
 
     // Update fields
+    // (email uses `undefined` rather than '' when cleared — see createClient for why)
     client.name = name || client.name;
-    client.email = email || client.email;
+    if (email !== undefined) client.email = email || undefined;
     client.phone = phone !== undefined ? phone : client.phone;
     client.companyName = companyName !== undefined ? companyName : client.companyName;
 

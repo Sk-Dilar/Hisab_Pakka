@@ -1,82 +1,164 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import logoUrl from '../assets/HIsab_logo.png';
 
+// jsPDF's built-in fonts can't render the ₹ glyph, so PDFs use a plain "Rs." prefix.
 const fmt = (n) =>
-  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(n || 0);
+  `Rs. ${new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0)}`;
 
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
-export const generateInvoicePdf = (invoice, user) => {
+const NAVY = [26, 31, 54];
+const ACCENT = [130, 200, 60];
+const GRAY = [100, 108, 125];
+const LIGHT_BG = [246, 248, 251];
+
+const loadImageAsDataUrl = (url) =>
+  fetch(url)
+    .then((res) => res.blob())
+    .then(
+      (blob) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        }),
+    )
+    .catch(() => null);
+
+export const generateInvoicePdf = async (invoice, user) => {
   const doc = new jsPDF();
   const client = invoice.clientId || {};
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 14;
 
-  // ── header ──
-  doc.setFontSize(18);
+  // ── header band ──
+  doc.setFillColor(...NAVY);
+  doc.rect(0, 0, pageWidth, 36, 'F');
+
+  doc.setTextColor(255, 255, 255);
   doc.setFont(undefined, 'bold');
-  doc.text(user?.name || 'Invoice', 14, 20);
-  doc.setFont(undefined, 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(100);
-  if (user?.email) doc.text(user.email, 14, 26);
-  if (user?.phone) doc.text(user.phone, 14, 31);
-
-  doc.setTextColor(0);
   doc.setFontSize(16);
-  doc.setFont(undefined, 'bold');
-  doc.text('INVOICE', 196, 20, { align: 'right' });
+  doc.text(user?.name || 'Invoice', marginX, 16);
   doc.setFont(undefined, 'normal');
-  doc.setFontSize(10);
-  doc.text(`No: ${invoice.invoiceNumber}`, 196, 27, { align: 'right' });
-  doc.text(`Date: ${fmtDate(invoice.createdAt)}`, 196, 32, { align: 'right' });
-  doc.text(`Status: ${invoice.status}`, 196, 37, { align: 'right' });
+  doc.setFontSize(9);
+  doc.setTextColor(190, 196, 214);
+  let headerLeftY = 23;
+  if (user?.email) { doc.text(user.email, marginX, headerLeftY); headerLeftY += 5.5; }
+  if (user?.phone) { doc.text(user.phone, marginX, headerLeftY); }
+
+  doc.setFont(undefined, 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(...ACCENT);
+  doc.text('INVOICE', pageWidth - marginX, 15, { align: 'right' });
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(220, 224, 235);
+  doc.text(`No: ${invoice.invoiceNumber}`, pageWidth - marginX, 22, { align: 'right' });
+  doc.text(`Date: ${fmtDate(invoice.createdAt)}`, pageWidth - marginX, 27.5, { align: 'right' });
+  doc.text(`Status: ${invoice.status}`, pageWidth - marginX, 33, { align: 'right' });
 
   // ── bill to ──
-  let y = 46;
+  doc.setTextColor(...GRAY);
+  doc.setFontSize(8.5);
+  doc.text('BILL TO', marginX, 50);
+
+  doc.setTextColor(...NAVY);
   doc.setFont(undefined, 'bold');
-  doc.text('Bill To', 14, y);
+  doc.setFontSize(11.5);
+  let y = 57;
+  doc.text(client.name || '—', marginX, y);
+
   doc.setFont(undefined, 'normal');
-  y += 6;
-  doc.text(client.name || '—', 14, y);
-  if (client.companyName) { y += 5; doc.text(client.companyName, 14, y); }
-  if (client.email) { y += 5; doc.text(client.email, 14, y); }
-  if (client.phone) { y += 5; doc.text(client.phone, 14, y); }
+  doc.setFontSize(9.5);
+  doc.setTextColor(...GRAY);
+  if (client.companyName) { y += 5.5; doc.text(client.companyName, marginX, y); }
+  if (client.email) { y += 5.5; doc.text(client.email, marginX, y); }
+  if (client.phone) { y += 5.5; doc.text(client.phone, marginX, y); }
 
   // ── items table ──
   autoTable(doc, {
     startY: y + 10,
-    head: [['Description', 'Qty', 'Rate', 'Amount']],
+    head: [['Description', 'Project', 'Qty', 'Rate', 'Amount']],
     body: (invoice.items || []).map((item) => [
       item.title,
-      item.quantity,
+      item.projectTitle || '—',
+      String(item.quantity),
       fmt(item.rate),
       fmt(item.totalAmount),
     ]),
     theme: 'striped',
-    headStyles: { fillColor: [26, 31, 54] },
+    margin: { left: marginX, right: marginX },
+    styles: { fontSize: 9.5, cellPadding: 4, textColor: [40, 44, 58] },
+    headStyles: { fillColor: NAVY, textColor: 255, fontStyle: 'bold', fontSize: 9 },
+    alternateRowStyles: { fillColor: LIGHT_BG },
     columnStyles: {
-      1: { halign: 'right' },
-      2: { halign: 'right' },
-      3: { halign: 'right' },
+      1: { textColor: [110, 118, 135] },
+      2: { halign: 'right', cellWidth: 16 },
+      3: { halign: 'right', cellWidth: 32 },
+      4: { halign: 'right', cellWidth: 34 },
     },
   });
 
-  // ── totals ──
-  let ty = doc.lastAutoTable.finalY + 10;
-  const label = 150;
-  const value = 196;
-  const row = (text, amount, bold = false) => {
-    doc.setFont(undefined, bold ? 'bold' : 'normal');
-    doc.text(text, label, ty);
-    doc.text(amount, value, ty, { align: 'right' });
-    ty += 6;
-  };
+  // ── totals box ──
+  const boxWidth = 84;
+  const boxX = pageWidth - marginX - boxWidth;
+  const rowH = 7;
+  const rows = [
+    { label: 'Subtotal', value: fmt(invoice.totalAmount) },
+    { label: 'Discount', value: `- ${fmt(invoice.discount)}` },
+    { label: 'Final Amount', value: fmt(invoice.finalAmount), bold: true },
+    { label: 'Paid', value: fmt(invoice.paidAmount) },
+    { label: 'Amount Due', value: fmt(invoice.dueAmount), bold: true, accent: true },
+  ];
 
-  row('Subtotal', fmt(invoice.totalAmount));
-  row('Discount', `- ${fmt(invoice.discount)}`);
-  row('Final Amount', fmt(invoice.finalAmount), true);
-  row('Paid', fmt(invoice.paidAmount));
-  row('Due', fmt(invoice.dueAmount), true);
+  let boxTop = doc.lastAutoTable.finalY + 8;
+  doc.setFillColor(...LIGHT_BG);
+  doc.roundedRect(boxX, boxTop, boxWidth, rows.length * rowH + 6, 2, 2, 'F');
+
+  let ty = boxTop + rowH;
+  rows.forEach(({ label, value, bold, accent }) => {
+    doc.setFont(undefined, bold ? 'bold' : 'normal');
+    doc.setFontSize(bold ? 10.5 : 9.5);
+    doc.setTextColor(...(accent ? [30, 130, 76] : bold ? NAVY : GRAY));
+    doc.text(label, boxX + 6, ty);
+    doc.text(value, pageWidth - marginX - 6, ty, { align: 'right' });
+    ty += rowH;
+  });
+
+  // ── footer (every page) ──
+  const logoDataUrl = await loadImageAsDataUrl(logoUrl);
+  const pageCount = doc.internal.getNumberOfPages();
+  const logoH = 7;
+  const logoW = logoH * 1.385; // native aspect ratio of the Hisab Pakka logo
+
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    const lineY = pageHeight - 16;
+    const textY = pageHeight - 10;
+
+    doc.setDrawColor(226, 232, 240);
+    doc.line(marginX, lineY, pageWidth - marginX, lineY);
+
+    let textX = marginX;
+    if (logoDataUrl) {
+      try {
+        doc.addImage(logoDataUrl, 'PNG', marginX, textY - logoH + 1.5, logoW, logoH);
+        textX = marginX + logoW + 4;
+      } catch {
+        /* logo failed to embed — footer text still renders without it */
+      }
+    }
+
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...GRAY);
+    doc.text('Generated by Hisab Pakka', textX, textY);
+    doc.text(`Page ${i} of ${pageCount}`, pageWidth - marginX, textY, { align: 'right' });
+  }
 
   doc.save(`${invoice.invoiceNumber}.pdf`);
 };

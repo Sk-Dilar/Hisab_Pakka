@@ -13,6 +13,7 @@ import Clients from "./pages/Clients";
 import ClientDetails from "./pages/ClientDetails";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
+import WorkItems from "./pages/WorkItems";
 import Settings from "./pages/Settings";
 import Invoices from "./pages/Invoices";
 import InvoiceDetails from "./pages/InvoiceDetails";
@@ -48,6 +49,7 @@ function App() {
           <Route path="clients/:id" element={<ClientDetails />} />
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:id" element={<ProjectDetails />} />
+          <Route path="work-items" element={<WorkItems />} />
           <Route path="invoices" element={<Invoices />} />
           <Route path="invoices/:id" element={<InvoiceDetails />} />
           <Route path="payments" element={<Payments />} />

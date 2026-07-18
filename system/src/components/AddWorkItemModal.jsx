@@ -1,21 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiAlertCircle, FiHash, FiDollarSign, FiFileText } from 'react-icons/fi';
-import { useAddWorkItemMutation } from '../store/api/apiSlice';
+import { FiX, FiAlertCircle, FiHash, FiDollarSign, FiFileText, FiBriefcase } from 'react-icons/fi';
+import { useAddWorkItemMutation, useGetProjectsQuery } from '../store/api/apiSlice';
 
 const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
-  const [formData, setFormData] = useState({ title: '', quantity: 1, rate: 0 });
+  const needsProjectPicker = !projectId;
+  const [formData, setFormData] = useState({ title: '', quantity: 1, rate: 0, projectId: projectId || '' });
   const [errorMsg, setErrorMsg] = useState('');
   const [addWorkItem, { isLoading }] = useAddWorkItemMutation();
 
+  // Only ongoing projects can receive new billable work
+  const { data: projectsData } = useGetProjectsQuery(
+    { status: 'Ongoing', limit: 100 },
+    { skip: !open || !needsProjectPicker },
+  );
+
   useEffect(() => {
-    if (open) { setFormData({ title: '', quantity: 1, rate: 0 }); setErrorMsg(''); }
-  }, [open]);
+    if (open) { setFormData({ title: '', quantity: 1, rate: 0, projectId: projectId || '' }); setErrorMsg(''); }
+  }, [open, projectId]);
 
   if (!open) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: name === 'title' ? value : parseFloat(value) || 0 });
+    if (name === 'title' || name === 'projectId') {
+      setFormData({ ...formData, [name]: value });
+    } else {
+      setFormData({ ...formData, [name]: parseFloat(value) || 0 });
+    }
     setErrorMsg('');
   };
 
@@ -24,8 +35,25 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
     if (!formData.title.trim() || formData.quantity <= 0 || formData.rate < 0) {
       setErrorMsg('Please fill all fields correctly'); return;
     }
+
+    const resolvedProjectId = projectId || formData.projectId;
+    if (!resolvedProjectId) { setErrorMsg('Please select a project'); return; }
+
+    let resolvedClientId = clientId;
+    if (!resolvedClientId) {
+      const project = projectsData?.projects?.find((p) => p._id === resolvedProjectId);
+      resolvedClientId = project?.clientId?._id || project?.clientId;
+    }
+    if (!resolvedClientId) { setErrorMsg('Could not determine the client for this project'); return; }
+
     try {
-      await addWorkItem({ ...formData, projectId, clientId }).unwrap();
+      await addWorkItem({
+        title: formData.title,
+        quantity: formData.quantity,
+        rate: formData.rate,
+        projectId: resolvedProjectId,
+        clientId: resolvedClientId,
+      }).unwrap();
       onClose();
     } catch (err) {
       setErrorMsg(err.data?.message || 'Failed to add work item');
@@ -42,7 +70,9 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <div>
             <h3 className="font-bold text-[#1a1f36]">Log Work Item</h3>
-            <p className="text-xs text-slate-400">Record billable work for this project</p>
+            <p className="text-xs text-slate-400">
+              {needsProjectPicker ? 'Record billable work for an ongoing project' : 'Record billable work for this project'}
+            </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors">
             <FiX size={18} />
@@ -54,6 +84,30 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
             {errorMsg && (
               <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2.5 rounded-xl">
                 <FiAlertCircle size={15} /> {errorMsg}
+              </div>
+            )}
+
+            {/* project picker (only when not launched from a project's own page) */}
+            {needsProjectPicker && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Project *</label>
+                <div className="relative">
+                  <FiBriefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
+                  <select
+                    name="projectId" value={formData.projectId} onChange={handleChange} required
+                    className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-[#2e4ed2]/25 focus:border-[#2e4ed2] transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="">Select an ongoing project...</option>
+                    {projectsData?.projects?.map((p) => (
+                      <option key={p._id} value={p._id}>
+                        {p.title}{p.clientId?.name ? ` — ${p.clientId.name}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {projectsData?.projects?.length === 0 && (
+                  <p className="text-[11px] text-slate-400">No ongoing projects — create one first.</p>
+                )}
               </div>
             )}
 

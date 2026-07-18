@@ -6,6 +6,13 @@ const invoiceItemSchema = new mongoose.Schema({
     ref: 'WorkItem',
     required: true
   },
+  projectId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Project'
+  },
+  projectTitle: {
+    type: String
+  },
   title: {
     type: String,
     required: true

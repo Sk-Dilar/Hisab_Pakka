@@ -1,11 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  FiHome, 
-  FiUsers, 
-  FiBriefcase, 
-  FiFileText, 
-  FiDollarSign, 
+import {
+  FiHome,
+  FiUsers,
+  FiBriefcase,
+  FiCheckSquare,
+  FiFileText,
+  FiDollarSign,
   FiLogOut,
   FiX,
   FiSettings
@@ -15,12 +16,13 @@ import { logout } from '../store/slices/authSlice';
 import logo from '../assets/HIsab_logo.png';
 
 const navItems = [
-  { name: 'Dashboard', icon: FiHome, path: '/app/dashboard' },
-  { name: 'Clients',   icon: FiUsers,     path: '/app/clients' },
-  { name: 'Projects',  icon: FiBriefcase, path: '/app/projects' },
-  { name: 'Invoices',  icon: FiFileText,  path: '/app/invoices' },
-  { name: 'Payments',  icon: FiDollarSign,path: '/app/payments' },
-  { name: 'Settings',  icon: FiSettings,  path: '/app/settings' },
+  { name: 'Dashboard',  icon: FiHome,       path: '/app/dashboard' },
+  { name: 'Clients',    icon: FiUsers,      path: '/app/clients' },
+  { name: 'Projects',   icon: FiBriefcase,  path: '/app/projects' },
+  { name: 'Work Items', icon: FiCheckSquare,path: '/app/work-items' },
+  { name: 'Invoices',   icon: FiFileText,   path: '/app/invoices' },
+  { name: 'Payments',   icon: FiDollarSign, path: '/app/payments' },
+  { name: 'Settings',   icon: FiSettings,   path: '/app/settings' },
 ];
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {

@@ -72,7 +72,7 @@ const InvoiceDetails = () => {
               </button>
             )}
             <button
-              onClick={() => generateInvoicePdf(invoice, user)}
+              onClick={() => generateInvoicePdf(invoice, user).catch(console.error)}
               className="flex items-center gap-1.5 text-sm font-semibold text-white bg-[#1a1f36] hover:bg-[#242a45] px-4 py-2 rounded-xl transition-colors"
             >
               <FiDownload size={14} /> Download PDF
@@ -115,6 +115,7 @@ const InvoiceDetails = () => {
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
                   <th className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Description</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Project</th>
                   <th className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Qty</th>
                   <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Rate</th>
                   <th className="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Amount</th>
@@ -124,6 +125,15 @@ const InvoiceDetails = () => {
                 {invoice.items?.map((item, i) => (
                   <tr key={i}>
                     <td className="px-5 py-3.5 font-medium text-[#1a1f36]">{item.title}</td>
+                    <td className="px-4 py-3.5 text-slate-500">
+                      {item.projectId ? (
+                        <Link to={`/app/projects/${item.projectId}`} className="text-[#2e4ed2] hover:underline">
+                          {item.projectTitle || 'View project'}
+                        </Link>
+                      ) : (
+                        item.projectTitle || '—'
+                      )}
+                    </td>
                     <td className="px-4 py-3.5 text-center text-slate-500">{item.quantity}</td>
                     <td className="px-4 py-3.5 text-right text-slate-500">{fmt(item.rate)}</td>
                     <td className="px-5 py-3.5 text-right font-bold text-[#1a1f36]">{fmt(item.totalAmount)}</td>

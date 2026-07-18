@@ -3,6 +3,7 @@ import Invoice from '../models/Invoice.js';
 import WorkItem from '../models/WorkItem.js';
 import Client from '../models/Client.js';
 import User from '../models/User.js';
+import Project from '../models/Project.js';
 
 // Get all invoices with pagination
 export const getInvoices = async (req, res) => {
@@ -78,8 +79,18 @@ export const generateInvoice = async (req, res) => {
       return res.status(400).json({ message: 'No unbilled work items found for this client' });
     }
 
+    // Work items may span multiple projects for the same client — snapshot
+    // each item's project name so a bundled invoice stays traceable to source.
+    const projectIds = [...new Set(unbilledItems.map(item => String(item.projectId)))];
+    const projects = await Project.find({ _id: { $in: projectIds }, userId })
+      .select('title')
+      .session(session);
+    const projectTitleById = new Map(projects.map(p => [String(p._id), p.title]));
+
     const itemsToAppend = unbilledItems.map(item => ({
       workItemId: item._id,
+      projectId: item.projectId,
+      projectTitle: projectTitleById.get(String(item.projectId)) || '',
       title: item.title,
       quantity: item.quantity,
       rate: item.rate,

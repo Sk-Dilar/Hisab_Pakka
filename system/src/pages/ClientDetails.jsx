@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  FiArrowLeft, FiEdit2, FiMail, FiPhone, FiBriefcase, FiCalendar,
+  FiArrowLeft, FiEdit2, FiMail, FiPhone, FiBriefcase, FiCalendar, FiPlus,
   FiBriefcase as FiProject, FiFileText,
 } from 'react-icons/fi';
 import { useGetClientQuery, useGetProjectsQuery, useGetInvoicesQuery } from '../store/api/apiSlice';
 import EditClientModal from '../components/EditClientModal';
+import CreateProjectModal from '../components/CreateProjectModal';
 
 const fmt = (n) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
@@ -25,6 +26,7 @@ const statusChip = (paid, finalAmt) => {
 const ClientDetails = () => {
   const { id } = useParams();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
 
   const { data: client, isLoading: clientLoading } = useGetClientQuery(id, { skip: !id });
   const { data: projectsData, isLoading: projectsLoading } = useGetProjectsQuery({ clientId: id, limit: 5 }, { skip: !id });
@@ -115,6 +117,12 @@ const ClientDetails = () => {
         <div className="bg-white rounded-2xl shadow-card border border-slate-200/60 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <h2 className="font-bold text-[#1a1f36] flex items-center gap-2"><FiProject size={16} /> Projects</h2>
+            <button
+              onClick={() => setIsCreateProjectOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold bg-[#1a1f36] hover:bg-[#242a45] text-white px-3 py-1.5 rounded-xl transition-colors"
+            >
+              <FiPlus size={13} /> New Project
+            </button>
           </div>
           <div className="divide-y divide-slate-100">
             {projectsLoading ? (
@@ -161,6 +169,12 @@ const ClientDetails = () => {
       </div>
 
       <EditClientModal open={isEditOpen} onClose={() => setIsEditOpen(false)} client={client} />
+
+      <CreateProjectModal
+        open={isCreateProjectOpen}
+        onClose={() => setIsCreateProjectOpen(false)}
+        presetClient={client}
+      />
     </div>
   );
 };

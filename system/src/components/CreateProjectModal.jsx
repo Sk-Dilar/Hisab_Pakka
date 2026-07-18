@@ -14,15 +14,18 @@ const Field = ({ label, error, children }) => (
 
 const inputCls = "w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-[#2e4ed2]/25 focus:border-[#2e4ed2] transition-all";
 
-const CreateProjectModal = ({ open, onClose }) => {
-  const [formData, setFormData] = useState({ clientId: '', title: '', description: '', status: 'Ongoing' });
+const CreateProjectModal = ({ open, onClose, presetClient }) => {
+  const [formData, setFormData] = useState({ clientId: presetClient?._id || '', title: '', description: '', status: 'Ongoing' });
   const [errorMsg, setErrorMsg] = useState('');
-  const { data: clientsData } = useGetClientsQuery({ limit: 100 });
+  const { data: clientsData } = useGetClientsQuery({ limit: 100 }, { skip: !!presetClient });
   const [createProject, { isLoading }] = useCreateProjectMutation();
 
   useEffect(() => {
-    if (open) { setFormData({ clientId: '', title: '', description: '', status: 'Ongoing' }); setErrorMsg(''); }
-  }, [open]);
+    if (open) {
+      setFormData({ clientId: presetClient?._id || '', title: '', description: '', status: 'Ongoing' });
+      setErrorMsg('');
+    }
+  }, [open, presetClient]);
 
   if (!open) return null;
 
@@ -62,20 +65,31 @@ const CreateProjectModal = ({ open, onClose }) => {
             )}
 
             {/* client select */}
-            <Field label="Client *">
-              <div className="relative">
-                <FiUsers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
-                <select name="clientId" value={formData.clientId} onChange={handleChange}
-                  className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-[#2e4ed2]/25 focus:border-[#2e4ed2] transition-all appearance-none cursor-pointer">
-                  <option value="">Select a client...</option>
-                  {clientsData?.clients?.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.name}{c.companyName ? ` (${c.companyName})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </Field>
+            {presetClient ? (
+              <Field label="Client">
+                <div className="flex items-center gap-2 px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-slate-50">
+                  <FiUsers className="text-slate-400 flex-shrink-0" size={14} />
+                  <span className="font-medium text-[#1a1f36]">
+                    {presetClient.name}{presetClient.companyName ? ` (${presetClient.companyName})` : ''}
+                  </span>
+                </div>
+              </Field>
+            ) : (
+              <Field label="Client *">
+                <div className="relative">
+                  <FiUsers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
+                  <select name="clientId" value={formData.clientId} onChange={handleChange}
+                    className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-[#2e4ed2]/25 focus:border-[#2e4ed2] transition-all appearance-none cursor-pointer">
+                    <option value="">Select a client...</option>
+                    {clientsData?.clients?.map((c) => (
+                      <option key={c._id} value={c._id}>
+                        {c.name}{c.companyName ? ` (${c.companyName})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </Field>
+            )}
 
             {/* title */}
             <Field label="Project Title *">
