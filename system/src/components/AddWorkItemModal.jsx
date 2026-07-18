@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FiX, FiAlertCircle, FiHash, FiDollarSign, FiFileText, FiBriefcase } from 'react-icons/fi';
 import { useAddWorkItemMutation, useGetProjectsQuery } from '../store/api/apiSlice';
+import CustomSelect from './CustomSelect';
 
 const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
   const needsProjectPicker = !projectId;
@@ -22,7 +24,7 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'title' || name === 'projectId') {
+    if (name === 'title') {
       setFormData({ ...formData, [name]: value });
     } else {
       setFormData({ ...formData, [name]: parseFloat(value) || 0 });
@@ -63,7 +65,7 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
   const total = (formData.quantity * formData.rate).toFixed(2);
   const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm animate-slide-up overflow-hidden">
         {/* header */}
@@ -91,20 +93,16 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
             {needsProjectPicker && (
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Project *</label>
-                <div className="relative">
-                  <FiBriefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
-                  <select
-                    name="projectId" value={formData.projectId} onChange={handleChange} required
-                    className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-[#2e4ed2]/25 focus:border-[#2e4ed2] transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="">Select an ongoing project...</option>
-                    {projectsData?.projects?.map((p) => (
-                      <option key={p._id} value={p._id}>
-                        {p.title}{p.clientId?.name ? ` — ${p.clientId.name}` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  icon={FiBriefcase}
+                  value={formData.projectId}
+                  onChange={(val) => { setFormData({ ...formData, projectId: val }); setErrorMsg(''); }}
+                  placeholder="Select an ongoing project..."
+                  options={(projectsData?.projects || []).map((p) => ({
+                    value: p._id,
+                    label: `${p.title}${p.clientId?.name ? ` — ${p.clientId.name}` : ''}`,
+                  }))}
+                />
                 {projectsData?.projects?.length === 0 && (
                   <p className="text-[11px] text-slate-400">No ongoing projects — create one first.</p>
                 )}
@@ -181,7 +179,8 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

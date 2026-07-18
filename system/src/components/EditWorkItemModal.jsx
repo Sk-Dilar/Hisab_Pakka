@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FiX, FiAlertCircle, FiHash, FiDollarSign, FiFileText } from 'react-icons/fi';
 import { useUpdateWorkItemMutation } from '../store/api/apiSlice';
 
@@ -42,7 +43,7 @@ const EditWorkItemModal = ({ open, onClose, workItem }) => {
   const total = (formData.quantity * formData.rate).toFixed(2);
   const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm animate-slide-up overflow-hidden">
         {/* header */}
@@ -134,7 +135,8 @@ const EditWorkItemModal = ({ open, onClose, workItem }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

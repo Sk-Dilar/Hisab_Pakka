@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FiX, FiAlertCircle, FiBriefcase, FiUsers, FiFileText, FiFlag } from 'react-icons/fi';
 import { useCreateProjectMutation, useGetClientsQuery } from '../store/api/apiSlice';
+import CustomSelect from './CustomSelect';
 
 const STATUS_OPTIONS = ['Ongoing', 'Finished', 'On Hold'];
 
@@ -42,7 +44,7 @@ const CreateProjectModal = ({ open, onClose, presetClient }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md animate-slide-up overflow-hidden">
         {/* header */}
@@ -76,18 +78,16 @@ const CreateProjectModal = ({ open, onClose, presetClient }) => {
               </Field>
             ) : (
               <Field label="Client *">
-                <div className="relative">
-                  <FiUsers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
-                  <select name="clientId" value={formData.clientId} onChange={handleChange}
-                    className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-[#2e4ed2]/25 focus:border-[#2e4ed2] transition-all appearance-none cursor-pointer">
-                    <option value="">Select a client...</option>
-                    {clientsData?.clients?.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name}{c.companyName ? ` (${c.companyName})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  icon={FiUsers}
+                  value={formData.clientId}
+                  onChange={(val) => { setFormData({ ...formData, clientId: val }); setErrorMsg(''); }}
+                  placeholder="Select a client..."
+                  options={(clientsData?.clients || []).map((c) => ({
+                    value: c._id,
+                    label: `${c.name}${c.companyName ? ` (${c.companyName})` : ''}`,
+                  }))}
+                />
               </Field>
             )}
 
@@ -149,7 +149,8 @@ const CreateProjectModal = ({ open, onClose, presetClient }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

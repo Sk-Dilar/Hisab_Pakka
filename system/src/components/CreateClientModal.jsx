@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FiX, FiUser, FiMail, FiPhone, FiBriefcase, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import { useCreateClientMutation } from '../store/api/apiSlice';
 
@@ -63,7 +64,7 @@ const CreateClientModal = ({ open, onClose }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md animate-slide-up overflow-hidden">
         {/* header */}
@@ -123,7 +124,8 @@ const CreateClientModal = ({ open, onClose }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
