@@ -52,30 +52,36 @@ export const getPayment = async (req, res) => {
 
 // Add Payment (FIFO Allocation)
 export const addPayment = async (req, res) => {
+  const userId = req.user.id;
+  const { clientId, amount, method, note } = req.body;
+
+  // Pure-input validation runs BEFORE the session opens so early returns
+  // can never leak a transaction.
+  if (!clientId || !amount || !method) {
+    return res.status(400).json({ message: 'Client ID, amount, and method are required' });
+  }
+
+  const amt = Number(amount);
+  // Reject anything the schema's `min: 0.01` would later throw a raw 500 for,
+  // including the (0, 0.01) gap the old `amount <= 0` check missed.
+  if (!Number.isFinite(amt) || amt < 0.01) {
+    return res.status(400).json({ message: 'Amount must be at least 0.01' });
+  }
+
   const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const userId = req.user.id;
-    const { clientId, amount, method, note } = req.body;
-
-    if (!clientId || !amount || !method) {
-      return res.status(400).json({ message: 'Client ID, amount, and method are required' });
-    }
-
-    if (amount <= 0) {
-      return res.status(400).json({ message: 'Amount must be greater than 0' });
-    }
+    session.startTransaction();
 
     // 1. Decrease client.currentBalance by the payment amount
     const client = await Client.findOneAndUpdate(
       { _id: clientId, userId },
-      { $inc: { currentBalance: -amount } },
+      { $inc: { currentBalance: -amt } },
       { session, new: true }
     );
 
     if (!client) {
-      throw new Error('Client not found');
+      await session.abortTransaction();
+      return res.status(404).json({ message: 'Client not found' });
     }
 
     // 2. Fetch all unpaid/partial invoices sorted by createdAt ASC (FIFO)
@@ -87,7 +93,7 @@ export const addPayment = async (req, res) => {
     .sort({ createdAt: 1 })
     .session(session);
 
-    let remainingPayment = amount;
+    let remainingPayment = amt;
     const allocations = [];
 
     // 3. Loop through invoices and distribute payment
@@ -115,7 +121,7 @@ export const addPayment = async (req, res) => {
     const payment = new Payment({
       userId,
       clientId,
-      amount,
+      amount: amt,
       method,
       note,
       allocations
@@ -124,13 +130,15 @@ export const addPayment = async (req, res) => {
     await payment.save({ session });
 
     await session.commitTransaction();
-    session.endSession();
-
     res.status(201).json(payment);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    if (session.inTransaction()) await session.abortTransaction();
     console.error('Add Payment Error:', error);
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: Object.values(error.errors)[0].message });
+    }
     res.status(500).json({ message: 'Failed to record payment', error: error.message });
+  } finally {
+    session.endSession();
   }
 };

@@ -9,8 +9,13 @@ const CustomSelect = ({ icon: Icon, value, onChange, options, placeholder = 'Sel
     const handleClickOutside = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
+    const handleKey = (e) => { if (e.key === 'Escape') setOpen(false); };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKey);
+    };
   }, []);
 
   const selected = options.find((o) => o.value === value);
@@ -20,7 +25,11 @@ const CustomSelect = ({ icon: Icon, value, onChange, options, placeholder = 'Sel
       <button
         type="button"
         disabled={disabled}
-        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        // stopPropagation guards against this being used inside a clickable
+        // table row/card, where a bare click would also bubble to the row's onClick
+        onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
         className={`w-full flex items-center justify-between gap-2 ${Icon ? 'pl-9' : 'pl-3.5'} pr-3 py-2.5 border rounded-xl text-sm bg-white outline-none transition-all
           ${open ? 'border-[#2e4ed2] ring-2 ring-[#2e4ed2]/25' : 'border-slate-200'}
           ${disabled ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : 'cursor-pointer hover:border-slate-300'}
@@ -34,7 +43,7 @@ const CustomSelect = ({ icon: Icon, value, onChange, options, placeholder = 'Sel
       {Icon && <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />}
 
       {open && !disabled && (
-        <div className="absolute z-20 mt-1.5 w-full max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-card py-1.5 animate-fade-in">
+        <div role="listbox" className="absolute z-20 mt-1.5 w-full max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-card py-1.5 animate-fade-in">
           {options.length === 0 ? (
             <p className="px-3.5 py-2 text-sm text-slate-400">No options available</p>
           ) : (
@@ -42,7 +51,9 @@ const CustomSelect = ({ icon: Icon, value, onChange, options, placeholder = 'Sel
               <button
                 key={opt.value}
                 type="button"
-                onClick={() => { onChange(opt.value); setOpen(false); }}
+                role="option"
+                aria-selected={opt.value === value}
+                onClick={(e) => { e.stopPropagation(); onChange(opt.value); setOpen(false); }}
                 className={`w-full flex items-center justify-between gap-2 px-3.5 py-2 text-sm text-left transition-colors
                   ${opt.value === value ? 'bg-[#eef1fb] text-[#1a1f36] font-semibold' : 'text-slate-600 hover:bg-slate-50'}
                 `}

@@ -61,21 +61,23 @@ export const getInvoice = async (req, res) => {
 
 // Generate Invoice (Intelligent)
 export const generateInvoice = async (req, res) => {
+  const userId = req.user.id;
+  const { clientId } = req.body;
+
+  // Pure-input validation before the session opens.
+  if (!clientId) {
+    return res.status(400).json({ message: 'Client ID is required' });
+  }
+
   const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const userId = req.user.id;
-    const { clientId } = req.body;
-
-    if (!clientId) {
-      return res.status(400).json({ message: 'Client ID is required' });
-    }
+    session.startTransaction();
 
     // 1. Fetch unbilled WorkItems
     const unbilledItems = await WorkItem.find({ clientId, userId, billed: false }).session(session);
-    
+
     if (unbilledItems.length === 0) {
+      await session.abortTransaction();
       return res.status(400).json({ message: 'No unbilled work items found for this client' });
     }
 
@@ -142,48 +144,57 @@ export const generateInvoice = async (req, res) => {
     );
 
     await session.commitTransaction();
-    session.endSession();
-
     res.status(201).json(invoice);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    if (session.inTransaction()) await session.abortTransaction();
     console.error('Generate Invoice Error:', error);
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: Object.values(error.errors)[0].message });
+    }
     res.status(500).json({ message: 'Failed to generate invoice', error: error.message });
+  } finally {
+    session.endSession();
   }
 };
 
 // Update discount
 export const updateDiscount = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  const { discount } = req.body;
+
+  // Pure-input validation before the session opens — reject non-numeric and
+  // negative up front (the old code let a non-numeric discount slip through
+  // both comparisons as NaN and blow up at save() with a raw 500).
+  const disc = Number(discount);
+  if (!Number.isFinite(disc) || disc < 0) {
+    return res.status(400).json({ message: 'Discount must be a number of 0 or greater' });
+  }
+
   const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const { id } = req.params;
-    const userId = req.user.id;
-    const { discount } = req.body;
-
-    if (discount < 0) {
-      return res.status(400).json({ message: 'Discount cannot be negative' });
-    }
+    session.startTransaction();
 
     const invoice = await Invoice.findOne({ _id: id, userId }).session(session);
-    
+
     if (!invoice) {
+      await session.abortTransaction();
       return res.status(404).json({ message: 'Invoice not found' });
     }
 
     if (invoice.paidAmount > 0) {
+      await session.abortTransaction();
       return res.status(400).json({ message: 'Cannot edit discount for partially or fully paid invoice' });
     }
 
-    const difference = discount - invoice.discount;
-
-    if (invoice.totalAmount - discount < 0) {
+    if (invoice.totalAmount - disc < 0) {
+      await session.abortTransaction();
       return res.status(400).json({ message: 'Discount cannot exceed total amount' });
     }
 
-    invoice.discount = discount;
+    const difference = disc - invoice.discount;
+
+    invoice.discount = disc;
     await invoice.save({ session }); // pre-save calculates dueAmount
 
     // Update Client Balance by subtracting the difference
@@ -196,12 +207,14 @@ export const updateDiscount = async (req, res) => {
     }
 
     await session.commitTransaction();
-    session.endSession();
-
     res.status(200).json(invoice);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    if (session.inTransaction()) await session.abortTransaction();
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: Object.values(error.errors)[0].message });
+    }
     res.status(500).json({ message: 'Failed to update discount', error: error.message });
+  } finally {
+    session.endSession();
   }
 };

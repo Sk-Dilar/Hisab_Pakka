@@ -133,7 +133,7 @@ const Dashboard = () => {
         <div className="bg-white rounded-2xl shadow-card border border-slate-200/60 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <h2 className="font-bold text-[#1a1f36]">Recent Activity</h2>
-            <Link to="/app/clients" className="text-xs text-[#2e4ed2] font-semibold hover:underline">View all →</Link>
+            <Link to="/app/work-items" className="text-xs text-[#2e4ed2] font-semibold hover:underline">View all →</Link>
           </div>
 
           {/* table-like header */}

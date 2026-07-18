@@ -194,9 +194,9 @@ const Settings = () => {
                 </li>
               ))}
             </ul>
-            <button className="w-full border-2 border-[#1a1f36] text-[#1a1f36] font-semibold text-sm py-2.5 rounded-xl hover:bg-[#1a1f36] hover:text-white transition-colors">
-              Upgrade Plan
-            </button>
+            <p className="text-xs text-center text-slate-400 pt-1">
+              You're on the Free plan — all features included.
+            </p>
           </div>
         </div>
       </div>

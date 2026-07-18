@@ -24,19 +24,19 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'title') {
-      setFormData({ ...formData, [name]: value });
-    } else {
-      setFormData({ ...formData, [name]: parseFloat(value) || 0 });
-    }
+    // Keep the raw string; don't coerce garbled input to 0 here (that silently
+    // turned a mistyped rate into ₹0). Validation happens on submit.
+    setFormData({ ...formData, [name]: value });
     setErrorMsg('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title.trim() || formData.quantity <= 0 || formData.rate < 0) {
-      setErrorMsg('Please fill all fields correctly'); return;
-    }
+    const quantity = Number(formData.quantity);
+    const rate = Number(formData.rate);
+    if (!formData.title.trim()) { setErrorMsg('Task description is required'); return; }
+    if (!Number.isFinite(quantity) || quantity <= 0) { setErrorMsg('Quantity must be a number greater than 0'); return; }
+    if (!Number.isFinite(rate) || rate < 0) { setErrorMsg('Rate must be a number of 0 or greater'); return; }
 
     const resolvedProjectId = projectId || formData.projectId;
     if (!resolvedProjectId) { setErrorMsg('Please select a project'); return; }
@@ -51,8 +51,8 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
     try {
       await addWorkItem({
         title: formData.title,
-        quantity: formData.quantity,
-        rate: formData.rate,
+        quantity,
+        rate,
         projectId: resolvedProjectId,
         clientId: resolvedClientId,
       }).unwrap();
@@ -62,7 +62,7 @@ const AddWorkItemModal = ({ open, onClose, projectId, clientId }) => {
     }
   };
 
-  const total = (formData.quantity * formData.rate).toFixed(2);
+  const total = ((Number(formData.quantity) * Number(formData.rate)) || 0).toFixed(2);
   const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
 
   return createPortal(

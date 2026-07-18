@@ -72,7 +72,7 @@ const InvoiceDetails = () => {
               </button>
             )}
             <button
-              onClick={() => generateInvoicePdf(invoice, user).catch(console.error)}
+              onClick={() => generateInvoicePdf(invoice, user).catch((e) => { console.error(e); alert('Could not generate the PDF. Please try again.'); })}
               className="flex items-center gap-1.5 text-sm font-semibold text-white bg-[#1a1f36] hover:bg-[#242a45] px-4 py-2 rounded-xl transition-colors"
             >
               <FiDownload size={14} /> Download PDF

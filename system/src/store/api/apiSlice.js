@@ -49,14 +49,22 @@ export const apiSlice = createApi({
         method: 'POST',
         data,
       }),
-      invalidatesTags: [{ type: 'Client', id: 'LIST' }, 'Project', 'WorkItem'],
+      invalidatesTags: [{ type: 'Client', id: 'LIST' }],
     }),
     getDashboardStats: builder.query({
       query: () => ({
         url: '/dashboard/stats',
         method: 'GET',
       }),
-      providesTags: ['Client', 'Project', 'WorkItem'],
+      // Use the {type, id:'LIST'} form so the mutations (which all invalidate
+      // the LIST tags, not the bare type) actually trigger a dashboard refetch.
+      providesTags: [
+        { type: 'Client', id: 'LIST' },
+        { type: 'Project', id: 'LIST' },
+        { type: 'WorkItem', id: 'LIST' },
+        { type: 'Payment', id: 'LIST' },
+        { type: 'Invoice', id: 'LIST' },
+      ],
     }),
     getProjects: builder.query({
       query: (params) => ({
@@ -103,7 +111,13 @@ export const apiSlice = createApi({
         url: `/projects/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: [{ type: 'Project', id: 'LIST' }],
+      // Deleting a project cascades to its work items and reverts the client
+      // balance, so refresh those lists too.
+      invalidatesTags: [
+        { type: 'Project', id: 'LIST' },
+        { type: 'WorkItem', id: 'LIST' },
+        { type: 'Client', id: 'LIST' },
+      ],
     }),
     getWorkItems: builder.query({
       query: (params) => ({

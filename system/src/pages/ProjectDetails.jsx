@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  FiArrowLeft, FiPlus, FiTrash2, FiClock, FiCheckCircle, FiAlertCircle, FiDollarSign, FiCalendar, FiUser, FiEdit2, FiMoreVertical
+import {
+  FiArrowLeft, FiPlus, FiTrash2, FiClock, FiCheckCircle, FiAlertCircle, FiDollarSign, FiCalendar, FiUser, FiEdit2
 } from 'react-icons/fi';
 import { 
   useGetProjectQuery, 

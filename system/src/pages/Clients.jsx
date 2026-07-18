@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FiSearch, FiPlus, FiTrash2, FiEye, FiEdit2, FiHome, FiUsers, FiRefreshCw } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGetClientsQuery, useDeleteClientMutation, useRestoreClientMutation } from '../store/api/apiSlice';
@@ -26,28 +27,30 @@ const Avatar = ({ name }) => {
 };
 
 /* ── confirm modal ───────────────────────────────── */
-const ConfirmModal = ({ title, message, onConfirm, onCancel, danger }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-    <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-slide-up">
-      <h3 className="font-bold text-lg text-[#1a1f36] mb-2">{title}</h3>
-      <p className="text-sm text-slate-500 mb-6">{message}</p>
-      <div className="flex gap-3 justify-end">
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={onConfirm}
-          className={`px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors ${danger ? 'bg-red-500 hover:bg-red-600' : 'bg-[#1a1f36] hover:bg-[#242a45]'}`}
-        >
-          Confirm
-        </button>
+const ConfirmModal = ({ title, message, onConfirm, onCancel, danger }) =>
+  createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-slide-up">
+        <h3 className="font-bold text-lg text-[#1a1f36] mb-2">{title}</h3>
+        <p className="text-sm text-slate-500 mb-6">{message}</p>
+        <div className="flex gap-3 justify-end">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors ${danger ? 'bg-red-500 hover:bg-red-600' : 'bg-[#1a1f36] hover:bg-[#242a45]'}`}
+          >
+            Confirm
+          </button>
+        </div>
       </div>
-    </div>
-  </div>
-);
+    </div>,
+    document.body
+  );
 
 /* ── main ─────────────────────────────────────────── */
 const Clients = () => {

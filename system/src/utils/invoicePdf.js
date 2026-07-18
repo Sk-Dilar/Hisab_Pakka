@@ -175,6 +175,14 @@ const buildInvoiceDoc = async (invoice, user) => {
   ];
 
   let ty = doc.lastAutoTable.finalY + 10;
+  // Page-break guard: jsPDF doesn't auto-paginate manual text/rect calls, so on a
+  // long invoice the totals stack + Amount Due bar can render off the page bottom.
+  // Push them to a fresh page if they wouldn't fit (mirrors the payment-info guard).
+  const totalsHeight = rows.length * rowH + (rowH + 3) + 6;
+  if (ty + totalsHeight > pageHeight - 22) {
+    doc.addPage();
+    ty = 24;
+  }
   rows.forEach(({ label, value, bold }) => {
     doc.setFont(undefined, bold ? 'bold' : 'normal');
     doc.setFontSize(bold ? 10.5 : 9.5);

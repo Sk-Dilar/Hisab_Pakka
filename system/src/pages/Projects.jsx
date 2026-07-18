@@ -37,7 +37,7 @@ const ProjectCard = ({ project, onView }) => (
     </div>
     <div className="px-5 py-3 border-t border-slate-100 flex justify-end">
       <button
-        onClick={onView}
+        onClick={(e) => { e.stopPropagation(); onView(); }}
         className="flex items-center gap-1.5 text-xs font-semibold text-[#2e4ed2] hover:text-[#1a1f36] transition-colors"
       >
         <FiEye size={14} /> View Details

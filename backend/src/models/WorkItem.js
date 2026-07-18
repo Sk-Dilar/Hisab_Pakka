@@ -24,16 +24,19 @@ const workItemSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     required: true,
-    default: 1
+    default: 1,
+    min: [0.01, 'Quantity must be greater than 0']
   },
   rate: {
     type: Number,
     required: true,
-    default: 0
+    default: 0,
+    min: [0, 'Rate cannot be negative']
   },
   totalAmount: {
     type: Number,
-    required: true
+    required: true,
+    min: [0, 'Total amount cannot be negative']
   },
   billed: {
     type: Boolean,

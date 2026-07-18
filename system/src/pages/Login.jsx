@@ -143,12 +143,8 @@ function Login() {
                 </div>
               </div>
 
-              {/* remember / forgot */}
-              <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 rounded border-slate-300 accent-[#2e4ed2]" />
-                  <span className="text-sm text-slate-500">Remember me</span>
-                </label>
+              {/* forgot password */}
+              <div className="flex items-center justify-end pt-1">
                 <Link to="/forgot-password" className="text-sm font-semibold text-[#2e4ed2] hover:underline">
                   Forgot password?
                 </Link>

@@ -1,5 +1,5 @@
 import express from 'express';
-import { body } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import * as clientController from '../controllers/clientController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -7,6 +7,16 @@ const router = express.Router();
 
 // All routes are protected
 router.use(protect);
+
+// Collect express-validator results and reject with a friendly 400. Without this
+// the validation chains below run but their errors are never read (dead code).
+const runValidation = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array()[0].msg });
+  }
+  next();
+};
 
 // Validation rules
 const createClientValidation = [
@@ -27,8 +37,8 @@ const updateClientValidation = [
 // Routes
 router.get('/', clientController.getClients);
 router.get('/:id', clientController.getClient);
-router.post('/', createClientValidation, clientController.createClient);
-router.put('/:id', updateClientValidation, clientController.updateClient);
+router.post('/', createClientValidation, runValidation, clientController.createClient);
+router.put('/:id', updateClientValidation, runValidation, clientController.updateClient);
 router.delete('/:id', clientController.deleteClient);
 router.put('/:id/restore', clientController.restoreClient);
 
