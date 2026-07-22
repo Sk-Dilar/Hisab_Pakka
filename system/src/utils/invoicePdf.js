@@ -19,24 +19,36 @@ const ACCENT_DARK = [58, 122, 30];
 const PAID_BG = [219, 234, 254];
 const PAID_TEXT = [30, 64, 175];
 
-const loadImageAsDataUrl = (url) =>
-  fetch(url)
-    .then((res) => res.blob())
-    .then(
-      (blob) =>
-        new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        }),
-    )
-    .catch(() => null);
+// Load the brand logo, downscaled to a small PNG data URL. The source asset is
+// 1800×1300 but only renders ~10mm wide in the footer; jsPDF embeds a raw decoded
+// bitmap, so shipping full-res would bloat the PDF to ~8MB. Drawing it onto a small
+// canvas first (~80× fewer pixels) keeps the embedded image to a few KB. Resolves
+// null on any failure so the footer caption still renders without the logo.
+const loadLogoDataUrl = (url) =>
+  new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const targetW = 240; // plenty of detail for a ~10mm print mark
+        const scale = targetW / img.width;
+        const canvas = document.createElement('canvas');
+        canvas.width = targetW;
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png')); // PNG keeps the logo's transparency
+      } catch {
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
 
 // Builds the jsPDF document for an invoice. Kept separate from save/preview so the
 // same layout can be downloaded (generateInvoicePdf) or rendered live (previewInvoicePdf).
 const buildInvoiceDoc = async (invoice, user) => {
-  const doc = new jsPDF();
+  const doc = new jsPDF({ compress: true });
   const client = invoice.clientId || {};
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -239,7 +251,7 @@ const buildInvoiceDoc = async (invoice, user) => {
   );
 
   // ── footer (every page) — Hisab Pakka's own branding, kept small and last ──
-  const logoDataUrl = await loadImageAsDataUrl(logoUrl);
+  const logoDataUrl = await loadLogoDataUrl(logoUrl);
   const pageCount = doc.internal.getNumberOfPages();
   const logoH = 7;
   const logoW = logoH * 1.385; // native aspect ratio of the Hisab Pakka logo
